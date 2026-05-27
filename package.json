@@ -1,0 +1,14 @@
+{
+  "name": "ildan-sarabom",
+  "version": "1.0.0",
+  "private": true,
+  "description": "AI 기반 청년 지역 체류 추천 서비스 프로토타입",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

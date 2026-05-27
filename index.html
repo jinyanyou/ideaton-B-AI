@@ -1,0 +1,3633 @@
+﻿<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>일단 살아봄</title>
+  <link rel="icon" type="image/png" href="assets/images/logo.png" />
+  <link rel="apple-touch-icon" href="assets/images/logo.png" />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" />
+  <style>
+    :root {
+      --ink: #391d01;
+      --muted: #8a7b67;
+      --line: #e9e1d3;
+      --paper: #fffdf9;
+      --soft: #f5f1e9;
+      --brand: #badd7f;
+      --brand-soft: #eef6db;
+      --brand-deep: #7aa83f;
+      --accent: #7aa83f;
+      --sea: #7aa83f;
+      --sea-soft: #eef6db;
+      --radius: 20px;
+      --shadow-card: 0 10px 30px rgba(57, 29, 1, .09);
+      --shadow-pop: 0 18px 44px rgba(57, 29, 1, .15);
+    }
+
+    * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at 14% 16%, rgba(186,221,127,.32), transparent 34%),
+        linear-gradient(135deg, #eef6db 0%, #fbf6ec 100%);
+      color: var(--ink);
+      font-family: "Pretendard", -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans KR", sans-serif;
+      letter-spacing: -0.01em;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    button, input { font: inherit; }
+    button { cursor: pointer; border: 0; background: none; color: inherit; }
+
+    .phone {
+      width: min(100vw, 412px);
+      height: min(100vh, 892px);
+      min-height: 720px;
+      position: relative;
+      overflow: hidden;
+      background: var(--paper);
+      border-radius: 30px;
+      box-shadow: 0 30px 90px rgba(44, 38, 33, .30);
+    }
+
+    .screen {
+      position: absolute;
+      inset: 0;
+      display: none;
+      overflow-y: auto;
+      padding: 34px 20px 96px;
+      scrollbar-width: none;
+    }
+
+    .screen::-webkit-scrollbar { display: none; }
+    .screen.active { display: block; }
+
+    .feed {
+      padding: 0;
+      overflow: hidden;
+      background: #111;
+      touch-action: none;
+    }
+
+    .story {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity .35s ease;
+      pointer-events: none;
+    }
+
+    .story.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .story::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image: linear-gradient(to bottom, rgba(0,0,0,.1), rgba(0,0,0,.05) 38%, rgba(0,0,0,.76));
+      z-index: 1;
+    }
+
+    .story img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .feed-top {
+      position: absolute;
+      z-index: 3;
+      top: 56px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #fff;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      border-radius: 999px;
+      padding: 10px 14px;
+      background: rgba(62, 62, 62, .58);
+      backdrop-filter: blur(12px);
+      color: #fff;
+      white-space: nowrap;
+    }
+
+    .brand-pill {
+      gap: 8px;
+      padding: 7px 12px 7px 7px;
+      background: rgba(255,255,255,.9);
+      color: var(--ink);
+      font-weight: 700;
+    }
+
+    .brand-pill-hint {
+      margin-left: 1px;
+      color: var(--brand-deep);
+      font-size: 13px;
+    }
+
+    .brand-logo {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .circle {
+      width: 56px;
+      height: 56px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: rgba(48, 48, 48, .5);
+      color: #fff;
+      font-size: 24px;
+    }
+
+    .feed-copy {
+      position: absolute;
+      z-index: 3;
+      left: 20px;
+      right: 78px;
+      bottom: 118px;
+      color: #fff;
+      text-shadow: 0 2px 16px rgba(0,0,0,.45);
+    }
+
+    .match {
+      width: fit-content;
+      margin-bottom: 10px;
+      background: var(--brand);
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    h1, h2, h3, p { margin: 0; }
+
+    .feed-copy h1 {
+      font-size: 37px;
+      line-height: 1.08;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .feed-copy .area {
+      margin-top: 6px;
+      font-size: 18px;
+    }
+
+    .feed-copy .lead {
+      margin-top: 20px;
+      font-size: 22px;
+      line-height: 1.35;
+    }
+
+    .feed-copy .sub {
+      margin-top: 6px;
+      color: rgba(255,255,255,.78);
+      font-size: 17px;
+      line-height: 1.4;
+    }
+
+    .tags {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      margin-top: 18px;
+      color: rgba(255,255,255,.9);
+      font-size: 15px;
+    }
+
+    .cta {
+      display: inline-flex;
+      margin-top: 26px;
+      padding: 15px 22px;
+      background: #fff;
+      color: #1f1b18;
+      border-radius: 999px;
+      font-size: 18px;
+    }
+
+    .side-actions {
+      position: absolute;
+      z-index: 3;
+      right: 18px;
+      bottom: 154px;
+      display: grid;
+      gap: 20px;
+      color: #fff;
+      text-align: center;
+    }
+
+    .side-actions button {
+      display: grid;
+      gap: 3px;
+      place-items: center;
+      color: #fff;
+      font-size: 13px;
+    }
+
+    .side-actions .icon {
+      font-size: 35px;
+      line-height: 1;
+      transition: transform .12s ease, color .12s ease;
+      filter: drop-shadow(0 2px 8px rgba(0,0,0,.28));
+    }
+
+    .side-actions button.on .icon {
+      color: var(--brand);
+      transform: scale(1.12);
+    }
+
+    .side-actions button:active .icon {
+      transform: scale(1.28);
+    }
+
+    .mini-rail {
+      position: absolute;
+      z-index: 4;
+      right: 14px;
+      top: 45%;
+      display: grid;
+      gap: 6px;
+    }
+
+    .mini-rail span {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: rgba(255,255,255,.45);
+    }
+
+    .mini-rail span.active {
+      width: 5px;
+      height: 54px;
+      border-radius: 999px;
+      background: #fff;
+    }
+
+    .bottom-nav {
+      position: absolute;
+      z-index: 10;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      height: 82px;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      align-items: center;
+      background: rgba(255,255,255,.92);
+      border-top: 1px solid rgba(0,0,0,.08);
+      backdrop-filter: blur(16px);
+    }
+
+    .feed + .bottom-nav,
+    .bottom-nav.on-feed {
+      background: linear-gradient(to top, rgba(0,0,0,.74), rgba(0,0,0,.2), transparent);
+      border-top: 0;
+    }
+
+    .nav-btn {
+      position: relative;
+      display: grid;
+      place-items: center;
+      gap: 3px;
+      color: #b7b3af;
+      font-size: 12px;
+    }
+
+    .nav-btn.active {
+      color: var(--brand-deep);
+      font-weight: 700;
+    }
+
+    .nav-btn.active::before {
+      content: "";
+      position: absolute;
+      top: -14px;
+      width: 26px;
+      height: 4px;
+      border-radius: 999px;
+      background: var(--brand-deep);
+    }
+
+    .bottom-nav.on-feed .nav-btn.active { color: #fff; }
+    .bottom-nav.on-feed .nav-btn.active::before { background: #fff; }
+
+    .bottom-nav.on-feed .nav-btn.active,
+    .bottom-nav.on-feed .nav-btn {
+      color: rgba(255,255,255,.75);
+    }
+
+    .bottom-nav.on-feed .nav-btn.active { color: #fff; }
+
+    .nav-icon {
+      font-size: 28px;
+      line-height: 1;
+    }
+
+    .page-title {
+      font-size: 33px;
+      line-height: 1.1;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 18px;
+    }
+
+    .search-box {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+      min-height: 56px;
+      border-radius: 16px;
+      background: #f2efec;
+      color: #a19a95;
+      padding: 0 18px;
+      margin-bottom: 24px;
+      font-size: 17px;
+      transition: box-shadow .15s ease, background .15s ease;
+    }
+
+    .search-box:focus-within {
+      background: #fff;
+      box-shadow: 0 0 0 2px rgba(122,168,63,.45);
+    }
+
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .category {
+      aspect-ratio: 1;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: #fff;
+      display: grid;
+      place-items: center;
+      gap: 6px;
+      box-shadow: 0 1px 0 rgba(0,0,0,.03);
+      font-size: 16px;
+    }
+
+    .category.selected {
+      border-color: var(--sea);
+      background: var(--sea-soft);
+      color: var(--sea);
+    }
+
+    .category b {
+      font-size: 29px;
+      line-height: 1;
+    }
+
+    .category small {
+      color: #a49d98;
+      font-size: 13px;
+    }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 4px 0 16px;
+      font-size: 23px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .region-card {
+      display: grid;
+      grid-template-columns: 84px 1fr auto;
+      gap: 15px;
+      align-items: center;
+      width: 100%;
+      min-height: 108px;
+      padding: 12px;
+      margin-bottom: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #fff;
+      box-shadow: var(--shadow-card);
+      transition: transform .12s ease, box-shadow .12s ease;
+    }
+
+    .region-card:active {
+      transform: scale(.985);
+    }
+
+    .region-card.hidden {
+      display: none;
+    }
+
+    .result-note {
+      margin: -6px 0 16px;
+      color: var(--muted);
+      font-size: 15px;
+    }
+
+    .no-results {
+      display: none;
+      border: 1px dashed var(--line);
+      border-radius: 18px;
+      padding: 22px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.5;
+    }
+
+    .no-results.active {
+      display: block;
+    }
+
+    .region-detail {
+      display: none;
+      margin-top: 18px;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      overflow: hidden;
+      background: #fff;
+      box-shadow: 0 12px 32px rgba(74, 62, 52, .1);
+    }
+
+    .region-detail.active {
+      display: block;
+    }
+
+    .region-detail img {
+      width: 100%;
+      height: 210px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .detail-body {
+      padding: 20px;
+    }
+
+    .detail-body h2 {
+      font-size: 26px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .detail-body p {
+      color: #635d58;
+      line-height: 1.55;
+      font-size: 15px;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 16px 0;
+    }
+
+    .detail-stat {
+      border-radius: 14px;
+      background: #f8f6f3;
+      padding: 12px;
+    }
+
+    .detail-stat b {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 14px;
+    }
+
+    .drone-view {
+      margin-top: 18px;
+      border-top: 1px solid var(--line);
+      padding-top: 18px;
+    }
+
+    .drone-head {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .drone-head h3 {
+      margin: 0 0 4px;
+      font-size: 21px;
+      font-weight: 700;
+    }
+
+    .drone-head p {
+      font-size: 14px;
+    }
+
+    .segmented {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin: 10px 0 14px;
+    }
+
+    .segment {
+      min-height: 36px;
+      padding: 0 12px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: #6a635e;
+      font-size: 14px;
+    }
+
+    .segment.active {
+      border-color: var(--sea);
+      background: var(--sea-soft);
+      color: var(--sea);
+      font-weight: 700;
+    }
+
+    .drone-canvas {
+      position: relative;
+      min-height: 230px;
+      overflow: hidden;
+      border-radius: 20px 20px 0 0;
+      background: linear-gradient(135deg, rgba(122,168,63,.78), rgba(57,29,1,.62)), url("https://commons.wikimedia.org/wiki/Special:FilePath/Anmok%20Beach%2020220430%20009.jpg") center/cover;
+      color: #fff;
+    }
+
+    .drone-canvas.ground {
+      background: linear-gradient(135deg, rgba(57,29,1,.74), rgba(122,168,63,.52)), url("https://commons.wikimedia.org/wiki/Special:FilePath/Jeonju%20Hanok%20Maeul%2001.jpg") center/cover;
+    }
+
+    .drone-canvas.evening {
+      background: linear-gradient(160deg, rgba(34,17,1,.9), rgba(57,29,1,.55)), url("https://commons.wikimedia.org/wiki/Special:FilePath/Cheongchoho%202019.jpg") center/cover;
+    }
+
+    .route-line {
+      position: absolute;
+      left: 24%;
+      right: 18%;
+      top: 47%;
+      height: 3px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.8);
+      transform: rotate(-13deg);
+      box-shadow: 0 0 0 5px rgba(255,255,255,.12);
+    }
+
+    .route-line.secondary {
+      left: 34%;
+      right: 24%;
+      top: 62%;
+      transform: rotate(18deg);
+      opacity: .7;
+    }
+
+    .map-pin {
+      position: absolute;
+      width: 78px;
+      min-height: 58px;
+      display: grid;
+      place-items: center;
+      gap: 2px;
+      border-radius: 16px;
+      padding: 8px;
+      background: rgba(255,255,255,.9);
+      color: #2b2521;
+      text-align: center;
+      font-size: 12px;
+      box-shadow: 0 12px 26px rgba(0,0,0,.22);
+    }
+
+    .map-pin b {
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .pin-stay { left: 12%; top: 37%; }
+    .pin-work { right: 12%; top: 22%; }
+    .pin-market { right: 18%; bottom: 16%; }
+    .pin-nature { left: 18%; bottom: 16%; }
+
+    .drone-caption {
+      position: relative;
+      border-radius: 16px;
+      padding: 15px;
+      margin-top: 0;
+      background: var(--ink);
+      color: #fff;
+    }
+
+    .drone-caption b {
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .drone-caption p {
+      color: rgba(255,255,255,.86);
+      font-size: 14px;
+    }
+
+    .drone-panel {
+      overflow: hidden;
+      border-radius: 20px;
+    }
+
+    .living-list {
+      display: grid;
+      gap: 9px;
+      margin-top: 12px;
+    }
+
+    .living-row {
+      display: grid;
+      grid-template-columns: 82px 1fr;
+      gap: 10px;
+      align-items: start;
+      border-radius: 14px;
+      background: #f8f6f3;
+      padding: 11px;
+    }
+
+    .living-row b {
+      color: #3c3732;
+      font-size: 14px;
+    }
+
+    .living-row p {
+      font-size: 14px;
+    }
+
+    .region-card img {
+      width: 86px;
+      height: 86px;
+      border-radius: 15px;
+      object-fit: cover;
+    }
+
+    .region-card h3 {
+      font-size: 23px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 6px;
+    }
+
+    .region-card p {
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    .heart {
+      color: #c9c5c1;
+      font-size: 30px;
+      transition: transform .12s ease, color .12s ease;
+    }
+
+    .heart.saved { color: var(--accent); }
+    .heart:active { transform: scale(1.25); }
+
+    .jobs-header {
+      margin: -34px -20px 22px;
+      padding: 52px 20px 18px;
+      background: rgba(255,253,250,.96);
+      border-bottom: 1px solid var(--line);
+    }
+
+    .jobs-header h1 {
+      font-size: 33px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 10px;
+    }
+
+    .jobs-header p {
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.45;
+    }
+
+    .job-count {
+      margin-top: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--muted);
+      font-size: 17px;
+    }
+
+    .job-region-select {
+      margin-top: 18px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .job-region-select label {
+      color: #6f6863;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .job-region-select select {
+      width: 100%;
+      min-height: 50px;
+      border: 1px solid var(--line);
+      border-radius: 15px;
+      background: #fff;
+      color: var(--ink);
+      padding: 0 14px;
+      outline: 0;
+    }
+
+    .job-region-select select:focus {
+      border-color: var(--sea);
+      box-shadow: 0 0 0 3px rgba(122,168,63,.20);
+    }
+
+    .job-map {
+      position: relative;
+      height: 412px;
+      margin: 16px auto 0;
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      background:
+        radial-gradient(circle at 30% 12%, rgba(186,221,127,.24), transparent 45%),
+        linear-gradient(160deg, #eef6db, #f6f4ea);
+      overflow: hidden;
+    }
+
+    .korea-svg {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .korea-svg .land {
+      fill: #fdfbf7;
+      stroke: rgba(122,168,63,.5);
+      stroke-width: .5;
+      stroke-linejoin: round;
+      paint-order: stroke;
+      filter: drop-shadow(0 8px 14px rgba(73,91,88,.14));
+    }
+
+    .map-region {
+      position: absolute;
+      z-index: 2;
+      transform: translate(-50%, -50%);
+      display: grid;
+      justify-items: center;
+      gap: 2px;
+      background: none;
+      border: 0;
+      padding: 0;
+      white-space: nowrap;
+    }
+
+    .map-region .dot {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: var(--sea);
+      box-shadow: 0 0 0 4px rgba(122,168,63,.22), 0 2px 5px rgba(0,0,0,.22);
+      transition: transform .12s ease, background .12s ease, box-shadow .12s ease;
+    }
+
+    .map-region .lbl {
+      font-size: 10px;
+      line-height: 1.05;
+      font-weight: 600;
+      color: #36322e;
+      text-shadow: 0 1px 2px rgba(255,255,255,.95), 0 0 3px rgba(255,255,255,.9);
+    }
+
+    .map-region small {
+      display: block;
+      font-size: 9px;
+      font-weight: 700;
+      opacity: .55;
+    }
+
+    .map-region.active { z-index: 3; }
+
+    .map-region.active .dot {
+      background: var(--ink);
+      transform: scale(1.25);
+      box-shadow: 0 0 0 5px rgba(41,35,31,.18), 0 3px 7px rgba(0,0,0,.3);
+    }
+
+    .map-region.active .lbl { color: var(--ink); font-weight: 800; }
+
+    .stay-card {
+      overflow: hidden;
+      border-radius: 20px;
+      background: #fff;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow-card);
+      margin-bottom: 16px;
+    }
+
+    .stay-img {
+      position: relative;
+      height: 168px;
+    }
+
+    .stay-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .stay-img .stay-type {
+      position: absolute;
+      left: 12px;
+      top: 12px;
+      padding: 5px 11px;
+      border-radius: 999px;
+      background: rgba(255,255,255,.92);
+      color: var(--ink);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .stay-body {
+      padding: 16px 16px 18px;
+    }
+
+    .stay-body h3 {
+      font-size: 19px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 5px;
+    }
+
+    .stay-price {
+      color: var(--brand-deep);
+      font-weight: 700;
+      font-size: 15px;
+      margin-bottom: 10px;
+    }
+
+    .stay-walk {
+      margin: 10px 0 14px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .stay-jobs-btn {
+      width: 100%;
+      height: 50px;
+    }
+
+    .job-card {
+      overflow: hidden;
+      border-radius: 22px;
+      background: #fff;
+      box-shadow: var(--shadow-pop);
+      margin-bottom: 22px;
+    }
+
+    .job-img {
+      position: relative;
+      height: 240px;
+      overflow: hidden;
+    }
+
+    .job-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .walk {
+      position: absolute;
+      left: 14px;
+      bottom: 14px;
+      color: #fff;
+      background: rgba(36, 32, 30, .86);
+      padding: 9px 14px;
+      border-radius: 999px;
+      font-size: 15px;
+    }
+
+    .job-card .heart {
+      position: absolute;
+      right: 14px;
+      top: 14px;
+      width: 52px;
+      height: 52px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: rgba(255,255,255,.88);
+      color: #7d7772;
+    }
+
+    .job-body {
+      padding: 24px 20px 22px;
+    }
+
+    .job-body h2 {
+      font-size: 23px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+
+    .job-body .place {
+      color: var(--muted);
+      font-size: 17px;
+      margin-bottom: 20px;
+    }
+
+    .job-meta {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .meta-label {
+      color: #9b948f;
+      font-size: 15px;
+      margin-bottom: 4px;
+    }
+
+    .chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 18px;
+    }
+
+    .chip {
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: #f3f1ef;
+      color: #716a65;
+      font-size: 14px;
+    }
+
+    .mood {
+      border-top: 1px solid var(--line);
+      padding-top: 16px;
+      color: #a39b96;
+    }
+
+    .mood .chips { margin-top: 10px; margin-bottom: 18px; }
+    .mood .chip { background: #fff; border: 1px solid var(--line); }
+
+    .actions {
+      display: grid;
+      grid-template-columns: 1fr 92px;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .primary {
+      height: 56px;
+      border-radius: 999px;
+      background: var(--ink);
+      color: #fff;
+      font-size: 18px;
+    }
+
+    .secondary {
+      height: 56px;
+      border-radius: 999px;
+      border: 2px solid var(--ink);
+      color: var(--ink);
+      font-size: 18px;
+    }
+
+    .profile-top {
+      padding-top: 6px;
+      display: grid;
+      gap: 18px;
+    }
+
+    .profile-card {
+      border-radius: 24px;
+      padding: 22px;
+      background: linear-gradient(135deg, var(--brand-soft), #fbf3e6);
+      border: 1px solid rgba(255,255,255,.72);
+    }
+
+    .brand-mark {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-bottom: 14px;
+      font-weight: 700;
+      font-size: 15px;
+      color: var(--ink);
+    }
+
+    .brand-mark .brand-logo {
+      width: 34px;
+      height: 34px;
+      border-radius: 11px;
+      box-shadow: 0 4px 10px rgba(57,29,1,.18);
+    }
+
+    .profile-card h1 {
+      font-size: 29px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.2;
+      margin-bottom: 10px;
+    }
+
+    .profile-card p {
+      color: #5f5955;
+      line-height: 1.55;
+    }
+
+    .survey {
+      display: grid;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .survey button {
+      min-height: 48px;
+      text-align: left;
+      padding: 0 15px;
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 14px;
+      color: #5f5955;
+    }
+
+    .survey button.selected {
+      border-color: var(--sea);
+      color: var(--sea);
+      background: var(--sea-soft);
+    }
+
+    .input-form {
+      display: grid;
+      gap: 14px;
+      margin-top: 20px;
+    }
+
+    .field {
+      display: grid;
+      gap: 7px;
+    }
+
+    .field label,
+    .choice-title {
+      color: #6f6863;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .field input,
+    .field select {
+      width: 100%;
+      min-height: 48px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255,255,255,.86);
+      color: var(--ink);
+      outline: 0;
+      padding: 0 14px;
+    }
+
+    .field input:focus,
+    .field select:focus {
+      border-color: var(--sea);
+      box-shadow: 0 0 0 3px rgba(122,168,63,.20);
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .choice-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .choice {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      min-height: 40px;
+      padding: 0 13px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: #fff;
+      color: #6a635e;
+      font-size: 14px;
+    }
+
+    .choice.selected {
+      border-color: var(--brand-deep);
+      background: var(--sea-soft);
+      color: var(--brand-deep);
+      font-weight: 600;
+    }
+
+    .chip-x {
+      display: inline-grid;
+      place-items: center;
+      width: 17px;
+      height: 17px;
+      margin-right: -4px;
+      border-radius: 50%;
+      background: rgba(57,29,1,.12);
+      color: var(--ink);
+      font-size: 13px;
+      line-height: 1;
+    }
+
+    .choice.selected .chip-x {
+      background: rgba(57,29,1,.18);
+    }
+
+    .add-chip {
+      min-height: 40px;
+      padding: 0 14px;
+      border: 1px dashed var(--brand-deep);
+      border-radius: 999px;
+      background: var(--sea-soft);
+      color: var(--brand-deep);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .add-input {
+      min-height: 40px;
+      width: 130px;
+      border: 1px solid var(--brand-deep);
+      border-radius: 999px;
+      background: #fff;
+      color: var(--ink);
+      padding: 0 14px;
+      outline: 0;
+      font-size: 14px;
+      box-shadow: 0 0 0 3px rgba(122,168,63,.18);
+    }
+
+    .form-actions {
+      display: grid;
+      grid-template-columns: 1fr 96px;
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .ghost {
+      height: 52px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      color: #5f5955;
+      background: #fff;
+    }
+
+    .result-score {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .score-badge {
+      flex: 0 0 auto;
+      border-radius: 999px;
+      padding: 8px 11px;
+      color: var(--brand);
+      background: var(--ink);
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    .candidate-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 18px;
+      padding-top: 16px;
+      border-top: 1px solid var(--line);
+    }
+
+    .candidate {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 11px;
+      align-items: center;
+      padding: 12px;
+      border-radius: 14px;
+      background: var(--soft);
+    }
+
+    .candidate-rank {
+      width: 24px;
+      height: 24px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--brand);
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .candidate b {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 16px;
+    }
+
+    .candidate p {
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .ai-status {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .recommend {
+      border-radius: 22px;
+      background: #fff;
+      border: 1px solid var(--line);
+      padding: 20px;
+      box-shadow: var(--shadow-card);
+    }
+
+    .recommend h2 {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      font-size: 21px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 10px;
+    }
+
+    .recommend h2::before {
+      content: "";
+      width: 6px;
+      height: 20px;
+      border-radius: 999px;
+      background: var(--brand-deep);
+    }
+
+    .recommend p,
+    .recommend li {
+      color: #5f574d;
+      line-height: 1.55;
+      font-size: 15px;
+    }
+
+    .check-title {
+      margin-top: 14px;
+      font-weight: 700;
+      color: var(--ink) !important;
+      font-size: 14px !important;
+    }
+
+    .recommend ul#checkList {
+      list-style: none;
+      padding: 0;
+      margin: 8px 0 0;
+      display: grid;
+      gap: 7px;
+    }
+
+    .recommend ul#checkList li {
+      position: relative;
+      padding-left: 26px;
+    }
+
+    .recommend ul#checkList li::before {
+      content: "✓";
+      position: absolute;
+      left: 0;
+      top: 1px;
+      width: 18px;
+      height: 18px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--brand-soft);
+      color: var(--brand-deep);
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .recommend ul {
+      padding-left: 18px;
+      margin: 10px 0 0;
+    }
+
+    .match-card {
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .recommend-empty {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      border-style: dashed;
+      background: var(--brand-soft);
+    }
+
+    .recommend-empty .empty-icon {
+      flex: 0 0 auto;
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      background: var(--brand);
+      color: var(--ink);
+      font-size: 20px;
+    }
+
+    .recommend-empty b {
+      display: block;
+      font-size: 16px;
+      color: var(--ink);
+      margin-bottom: 3px;
+    }
+
+    .recommend-empty p {
+      font-size: 14px;
+      color: #5f574d;
+      line-height: 1.5;
+    }
+
+    .recommend-empty strong { color: var(--brand-deep); }
+
+    .match-loading {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .match-loading b {
+      display: block;
+      font-size: 16px;
+      color: var(--ink);
+      margin-bottom: 3px;
+    }
+
+    .match-loading p {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+
+    .loading-spinner {
+      flex: 0 0 auto;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 3px solid var(--brand-soft);
+      border-top-color: var(--brand-deep);
+      animation: spin .8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .match-banner {
+      position: relative;
+      height: 138px;
+    }
+
+    .match-banner img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .match-banner-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      gap: 6px;
+      padding: 16px;
+      background: linear-gradient(to top, rgba(57,29,1,.82), rgba(57,29,1,.12) 60%, rgba(57,29,1,.04));
+    }
+
+    .match-eyebrow {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--brand);
+      letter-spacing: .02em;
+    }
+
+    .match-headline {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .match-headline h2 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #fff;
+      text-shadow: 0 1px 6px rgba(0,0,0,.4);
+    }
+
+    .match-headline h2::before { display: none; }
+
+    .match-headline .score-badge {
+      background: rgba(255,255,255,.92);
+      color: var(--ink);
+    }
+
+    .match-body {
+      padding: 18px 20px 20px;
+    }
+
+    .local-link-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .local-link {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      background: linear-gradient(135deg, #fff, var(--sea-soft));
+    }
+
+    .local-link b {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 16px;
+      color: var(--ink);
+    }
+
+    .local-link p {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #635d58;
+    }
+
+    .local-link .chips { margin: 10px 0 0; }
+
+    .timeline {
+      display: grid;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .week {
+      border-left: 3px solid var(--sea);
+      padding: 6px 0 6px 14px;
+    }
+
+    .week b { display: block; margin-bottom: 3px; }
+
+    .app-modal {
+      position: absolute;
+      inset: 0;
+      z-index: 50;
+    }
+
+    .app-modal-backdrop {
+      position: absolute;
+      inset: 0;
+      background: rgba(57,29,1,.45);
+      backdrop-filter: blur(2px);
+      animation: fadeIn .2s ease;
+    }
+
+    .app-modal-card {
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      max-height: 88%;
+      overflow-y: auto;
+      scrollbar-width: none;
+      padding: 14px 22px 28px;
+      background: var(--paper);
+      border-radius: 26px 26px 0 0;
+      box-shadow: 0 -20px 50px rgba(57,29,1,.28);
+      animation: sheetUp .3s cubic-bezier(.2,.8,.2,1);
+    }
+
+    .app-modal-card::-webkit-scrollbar { display: none; }
+
+    .app-modal-grip {
+      display: block;
+      width: 42px;
+      height: 5px;
+      margin: 0 auto 16px;
+      border-radius: 999px;
+      background: var(--line);
+    }
+
+    .app-modal-close {
+      position: absolute;
+      top: 14px;
+      right: 16px;
+      width: 34px;
+      height: 34px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: var(--soft);
+      color: var(--ink);
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .app-about-head {
+      display: flex;
+      align-items: center;
+      gap: 13px;
+      margin-bottom: 16px;
+    }
+
+    .app-about-head .brand-logo {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      box-shadow: 0 6px 16px rgba(57,29,1,.18);
+    }
+
+    .app-about-head h2 {
+      font-size: 24px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .app-about-tagline {
+      margin-top: 3px;
+      color: var(--brand-deep);
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .app-about-lead {
+      color: #5f574d;
+      line-height: 1.6;
+      font-size: 15px;
+    }
+
+    .app-about-lead strong { color: var(--ink); }
+
+    .app-about-features {
+      list-style: none;
+      padding: 0;
+      margin: 18px 0 22px;
+      display: grid;
+      gap: 12px;
+    }
+
+    .app-about-features li {
+      display: grid;
+      gap: 3px;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: linear-gradient(135deg, #fff, var(--brand-soft));
+    }
+
+    .app-about-features b {
+      font-size: 15px;
+      color: var(--ink);
+    }
+
+    .app-about-features span {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #5f574d;
+    }
+
+    .app-about-cta {
+      width: 100%;
+    }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes sheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+    .toast {
+      position: absolute;
+      left: 50%;
+      bottom: 104px;
+      transform: translateX(-50%);
+      z-index: 60;
+      max-width: 84%;
+      padding: 12px 18px;
+      border-radius: 999px;
+      background: var(--ink);
+      color: #fff;
+      font-size: 14px;
+      font-weight: 600;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      box-shadow: 0 10px 26px rgba(57,29,1,.32);
+      animation: fadeIn .18s ease;
+    }
+
+    @media (max-width: 440px) {
+      body { display: block; background: var(--paper); }
+      .phone {
+        width: 100vw;
+        height: 100vh;
+        min-height: 100vh;
+        box-shadow: none;
+      }
+      .feed-copy h1 { font-size: 34px; }
+      .feed-copy .lead { font-size: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="phone" aria-label="일단 살아봄 앱 데모">
+    <section class="screen feed active" data-screen="home">
+      <article class="story active" data-story="0" data-region="부산 영도">
+        <img alt="부산 감천문화마을 전경" />
+        <div class="feed-copy">
+          <div class="match">↗ 인기 급상승 · AI 92%</div>
+          <h1>부산 감천문화마을</h1>
+          <p class="area">부산</p>
+          <p class="lead">골목마다 다른 색깔의 하루</p>
+          <p class="sub">매일 새로운 풍경을 만나는 한 달</p>
+          <div class="tags"><span>#감성카페</span><span>#예술적분위기</span><span>#혼자살기좋은</span></div>
+          <button class="cta" data-tab="explore">지역 더 알아보기 →</button>
+        </div>
+      </article>
+
+      <article class="story" data-story="1" data-region="강릉 안목해변">
+        <img alt="강릉 안목해변 바다 풍경" />
+        <div class="feed-copy">
+          <div class="match">✦ 알고리즘 추천 · AI 95%</div>
+          <h1>강릉 안목해변</h1>
+          <p class="area">강원도</p>
+          <p class="lead">파도 소리와 함께 시작하는 아침</p>
+          <p class="sub">바다가 보이는 카페에서 일하는 하루</p>
+          <div class="tags"><span>#조용한라이프스타일</span><span>#워케이션추천</span><span>#자연친화적</span></div>
+          <button class="cta" data-tab="explore">지역 더 알아보기 →</button>
+        </div>
+      </article>
+
+      <article class="story" data-story="2" data-region="서울 익선동">
+        <img alt="서울 익선동 밤 골목" />
+        <div class="feed-copy">
+          <div class="match">↗ 저장 급상승 · AI 88%</div>
+          <h1>서울 익선동</h1>
+          <p class="area">서울</p>
+          <p class="lead">전통과 현대의 조화로운 일상</p>
+          <p class="sub">야경이 아름다운 골목 산책</p>
+          <div class="tags"><span>#한옥스테이</span><span>#도심속휴식</span><span>#감성카페</span></div>
+          <button class="cta" data-tab="explore">지역 더 알아보기 →</button>
+        </div>
+      </article>
+
+      <article class="story" data-story="3" data-region="통영 봉평동">
+        <img alt="통영 바다 마을 분위기" />
+        <div class="feed-copy">
+          <div class="match">↗ 이번 주 급상승 · AI 91%</div>
+          <h1>통영 봉평동</h1>
+          <p class="area">경상남도</p>
+          <p class="lead">항구와 예술 공간 사이의 느린 하루</p>
+          <p class="sub">작업 후 걸어서 만나는 바다 산책</p>
+          <div class="tags"><span>#예술마을</span><span>#바다산책</span><span>#한달살기</span></div>
+          <button class="cta" data-tab="explore">지역 더 알아보기 →</button>
+        </div>
+      </article>
+
+      <article class="story" data-story="4" data-region="속초 청초호">
+        <img alt="속초 해변 생활권" />
+        <div class="feed-copy">
+          <div class="match">✦ 워케이션 추천 · AI 90%</div>
+          <h1>속초 청초호</h1>
+          <p class="area">강원도</p>
+          <p class="lead">호수와 바다를 오가는 작업 리듬</p>
+          <p class="sub">카페, 시장, 산책로가 가까운 생활권</p>
+          <div class="tags"><span>#호수산책</span><span>#시장근처</span><span>#재택근무</span></div>
+          <button class="cta" data-tab="explore">지역 더 알아보기 →</button>
+        </div>
+      </article>
+
+      <article class="story" data-story="5" data-region="제주 구좌">
+        <img alt="제주 구좌 마을 풍경" />
+        <div class="feed-copy">
+          <div class="match">↗ 검색 급상승 · AI 89%</div>
+          <h1>제주 구좌</h1>
+          <p class="area">제주도</p>
+          <p class="lead">오름과 바다가 가까운 조용한 체류</p>
+          <p class="sub">혼자 지내기 좋은 작은 카페와 책방</p>
+          <div class="tags"><span>#오름</span><span>#조용한마을</span><span>#독립서점</span></div>
+          <button class="cta" data-tab="explore">지역 더 알아보기 →</button>
+        </div>
+      </article>
+
+      <article class="story" data-story="6" data-region="목포 원도심">
+        <img alt="목포 구도심 야경" />
+        <div class="feed-copy">
+          <div class="match">✦ 취향 유사 사용자 추천 · AI 87%</div>
+          <h1>목포 원도심</h1>
+          <p class="area">전라남도</p>
+          <p class="lead">오래된 골목과 항구 야경이 있는 저녁</p>
+          <p class="sub">생활비 부담을 낮춘 문화 체류</p>
+          <div class="tags"><span>#구도심</span><span>#야경</span><span>#생활비</span></div>
+          <button class="cta" data-tab="explore">지역 더 알아보기 →</button>
+        </div>
+      </article>
+
+      <article class="story" data-story="7" data-region="춘천 소양강">
+        <img alt="춘천 호수와 카페 거리" />
+        <div class="feed-copy">
+          <div class="match">↗ 저장 증가 · AI 86%</div>
+          <h1>춘천 소양강</h1>
+          <p class="area">강원도</p>
+          <p class="lead">호수 산책과 카페 작업이 이어지는 하루</p>
+          <p class="sub">서울 접근성과 자연을 함께 보는 체류</p>
+          <div class="tags"><span>#호수</span><span>#카페작업</span><span>#서울근교</span></div>
+          <button class="cta" data-tab="explore">지역 더 알아보기 →</button>
+        </div>
+      </article>
+
+      <div class="feed-top">
+        <button class="pill brand-pill" id="brandPill" type="button" aria-label="일단 살아봄 앱 소개 보기"><img class="brand-logo" src="assets/images/logo.png" alt="" />일단 살아봄<span class="brand-pill-hint">ⓘ</span></button>
+      </div>
+
+      <div class="mini-rail" aria-hidden="true">
+        <span class="active"></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+
+      <div class="side-actions" aria-label="피드 작업">
+        <button type="button" id="feedLike" aria-label="좋아요"><span class="icon">♡</span><span id="feedLikeCount">0</span></button>
+        <button type="button" id="feedShare" aria-label="공유"><span class="icon">⤴</span><span>공유</span></button>
+      </div>
+    </section>
+
+    <section class="screen" data-screen="explore">
+      <h1 class="page-title">탐색</h1>
+      <label class="search-box">
+        <span>⌕</span>
+        <input id="searchInput" aria-label="검색" placeholder="지역, 분위기, 키워드 검색" style="border:0;background:transparent;outline:0;width:100%;color:var(--ink);" />
+      </label>
+
+      <div class="category-grid">
+        <button class="category" data-filter="바다"><b>🌊</b><span>바다</span><small>24곳</small></button>
+        <button class="category" data-filter="산 자연"><b>⛰</b><span>산</span><small>18곳</small></button>
+        <button class="category" data-filter="카페 작업"><b>☕</b><span>카페</span><small>42곳</small></button>
+        <button class="category" data-filter="예술 문화"><b>🎨</b><span>예술</span><small>15곳</small></button>
+        <button class="category" data-filter="조용한 혼자"><b>🤫</b><span>조용한</span><small>31곳</small></button>
+        <button class="category" data-filter="워케이션 재택근무"><b>💼</b><span>워케이션</span><small>27곳</small></button>
+      </div>
+
+      <h2 class="section-head">↗ 지금 인기 있는 지역</h2>
+      <p class="result-note" id="searchResultNote">추천 지역 4곳</p>
+      <div id="regionList">
+      <button class="region-card" data-region="강릉 안목해변" data-search="강릉 안목해변 강원도 바다 카페 워케이션 조용한 자연 산책 재택근무">
+        <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Anmok%20Beach%2020220430%20009.jpg" alt="강릉 안목해변" />
+        <span><h3>강릉</h3><p>⌖ 바다 × 카페</p></span>
+        <span class="heart">♡</span>
+      </button>
+      <button class="region-card" data-region="부산 영도" data-search="부산 영도 감천문화마을 예술 골목 바다 카페 로컬 프로젝트 혼자살기 조용한">
+        <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Jeonju%20Hanok%20Maeul%2001.jpg" alt="부산 감천문화마을" />
+        <span><h3>부산</h3><p>⌖ 예술 × 골목</p></span>
+        <span class="heart">♡</span>
+      </button>
+      <button class="region-card" data-region="서울 익선동" data-search="서울 익선동 한옥 야경 골목 카페 예술 도심 작업">
+        <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Cheongchoho%202019.jpg" alt="서울 익선동" />
+        <span><h3>서울</h3><p>⌖ 한옥 × 야경</p></span>
+        <span class="heart">♡</span>
+      </button>
+      <button class="region-card" data-region="전주 한옥마을 외곽" data-search="전주 한옥마을 외곽 골목 예술 문화 조용한 생활비 산책">
+        <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Jeonju%20Hanok%20Maeul%2001.jpg" alt="전주 한옥마을 외곽" />
+        <span><h3>전주</h3><p>⌖ 문화 × 조용한</p></span>
+        <span class="heart">♡</span>
+      </button>
+      <button class="region-card" data-region="통영 봉평동" data-search="통영 봉평동 경남 바다 항구 예술마을 한달살기 산책 로컬 프로젝트">
+        <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Anmok%20Beach%2020220430%20009.jpg" alt="통영 봉평동" />
+        <span><h3>통영</h3><p>⌖ 바다 × 예술</p></span>
+        <span class="heart">♡</span>
+      </button>
+      <button class="region-card" data-region="속초 청초호" data-search="속초 청초호 강원도 호수 바다 시장 카페 워케이션 재택근무 산책">
+        <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Anmok%20Beach%2020220430%20009.jpg" alt="속초 청초호" />
+        <span><h3>속초</h3><p>⌖ 호수 × 워케이션</p></span>
+        <span class="heart">♡</span>
+      </button>
+      <button class="region-card" data-region="제주 구좌" data-search="제주 구좌 제주도 오름 바다 조용한 마을 책방 카페 혼자살기 자연">
+        <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Jeonju%20Hanok%20Maeul%2001.jpg" alt="제주 구좌" />
+        <span><h3>제주</h3><p>⌖ 오름 × 조용한</p></span>
+        <span class="heart">♡</span>
+      </button>
+      <button class="region-card" data-region="목포 원도심" data-search="목포 원도심 전남 항구 골목 야경 문화 생활비 구도심 예술">
+        <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Cheongchoho%202019.jpg" alt="목포 원도심" />
+        <span><h3>목포</h3><p>⌖ 항구 × 야경</p></span>
+        <span class="heart">♡</span>
+      </button>
+      <button class="region-card" data-region="춘천 소양강" data-search="춘천 소양강 강원도 호수 카페 작업 서울근교 자연 산책 워케이션">
+        <img src="https://commons.wikimedia.org/wiki/Special:FilePath/Jeonju%20Hanok%20Maeul%2001.jpg" alt="춘천 소양강" />
+        <span><h3>춘천</h3><p>⌖ 호수 × 카페</p></span>
+        <span class="heart">♡</span>
+      </button>
+      </div>
+      <div class="no-results" id="noResults">검색 결과가 없습니다.<br />다른 지역, 분위기, 키워드로 검색해보세요.</div>
+      <article class="region-detail" id="regionDetail">
+        <img id="detailImage" src="https://commons.wikimedia.org/wiki/Special:FilePath/Jeonju%20Hanok%20Maeul%2001.jpg" alt="" />
+        <div class="detail-body">
+          <h2 id="detailTitle">지역 상세</h2>
+          <p id="detailDescription"></p>
+          <div class="detail-grid">
+            <div class="detail-stat"><b>생활 분위기</b><p id="detailMood"></p></div>
+            <div class="detail-stat"><b>체류 전 확인</b><p id="detailCheck"></p></div>
+          </div>
+          <div class="chips" id="detailChips"></div>
+          <section class="drone-view" aria-label="Drone Living View">
+            <div class="drone-head">
+              <span>
+                <h3>Drone Living View</h3>
+                <p>숙소 주변 생활권과 실제 이동 감각을 한 번에 확인합니다.</p>
+              </span>
+            </div>
+            <div class="segmented" aria-label="뷰 모드">
+              <button class="segment active" type="button" data-drone-mode="drone">드론</button>
+              <button class="segment" type="button" data-drone-mode="ground">지상 동선</button>
+            </div>
+            <div class="segmented" aria-label="시간대">
+              <button class="segment active" type="button" data-drone-time="day">낮</button>
+              <button class="segment" type="button" data-drone-time="evening">저녁</button>
+            </div>
+            <div class="drone-panel">
+              <div class="drone-canvas" id="droneCanvas">
+                <span class="route-line"></span>
+                <span class="route-line secondary"></span>
+                <div class="map-pin pin-stay"><b>⌂</b><span>숙소</span></div>
+                <div class="map-pin pin-work"><b>☕</b><span>작업 카페</span></div>
+                <div class="map-pin pin-market"><b>▣</b><span>마트</span></div>
+                <div class="map-pin pin-nature"><b>≈</b><span id="naturePin">산책로</span></div>
+              </div>
+              <div class="drone-caption">
+                <b id="droneCaptionTitle">숙소 주변 구조</b>
+                <p id="droneCaptionText">숙소, 카페, 마트, 산책로가 한 생활권 안에 있는지 확인합니다.</p>
+              </div>
+            </div>
+            <div class="living-list" id="livingList"></div>
+          </section>
+          <div class="timeline" id="detailTimeline"></div>
+        </div>
+      </article>
+    </section>
+
+    <section class="screen" data-screen="stay">
+      <h1 class="page-title">숙소</h1>
+      <div class="job-region-select">
+        <label for="stayRegion">지역 선택</label>
+        <select id="stayRegion"></select>
+      </div>
+      <div class="job-map" id="stayMap" aria-label="지역별 숙소 지도"></div>
+      <p class="result-note" id="stayNote" style="margin-top:16px;">지도나 목록에서 지역을 골라 머물 곳을 둘러보세요.</p>
+      <div id="stayList"></div>
+    </section>
+
+    <section class="screen" data-screen="jobs">
+      <div class="jobs-header">
+        <h1>주변 일자리</h1>
+        <p>내 숙소에서 가까운 단기 일자리를 찾아보세요</p>
+        <div class="job-region-select">
+          <label for="jobRegion">지역 선택</label>
+          <select id="jobRegion">
+            <option>강릉 안목해변</option>
+            <option>부산 영도</option>
+            <option>서울 익선동</option>
+            <option>전주 한옥마을 외곽</option>
+            <option>통영 봉평동</option>
+            <option>속초 청초호</option>
+            <option>제주 구좌</option>
+            <option>목포 원도심</option>
+            <option>춘천 소양강</option>
+            <option>군산 월명동</option>
+            <option>여수 고소동</option>
+            <option>순천 조례호수공원</option>
+          </select>
+        </div>
+        <div class="job-map" id="jobMap" aria-label="지역별 일자리 지도"></div>
+        <div class="job-count" id="jobCount">⌖ 강릉 안목해변 숙소 주변 · 0개의 일자리</div>
+      </div>
+
+      <div id="jobList"></div>
+    </section>
+
+    <section class="screen" data-screen="profile">
+      <div class="profile-top">
+        <div class="profile-card">
+          <div class="brand-mark"><img class="brand-logo" src="assets/images/logo.png" alt="일단 살아봄 로고" /><span>일단 살아봄</span></div>
+          <h1 id="profileGreeting">나를 위한 일단 살아봄</h1>
+          <p>이름과 생활 취향, 업무 조건, 예산을 입력하고 저장하면 나에게 맞는 지역과 실행 계획을 만들어줍니다. 입력한 프로필은 이 기기에 저장됩니다.</p>
+          <form class="input-form" id="profileForm">
+            <div class="split">
+              <div class="field">
+                <label for="userName">이름</label>
+                <input id="userName" name="userName" placeholder="이름을 입력하세요" autocomplete="name" />
+              </div>
+              <div class="field">
+                <label for="job">직무/전공</label>
+                <input id="job" name="job" placeholder="예: UX 디자이너" />
+              </div>
+            </div>
+
+            <div class="split">
+              <div class="field">
+                <label for="budget">한 달 예산</label>
+                <select id="budget" name="budget">
+                  <option value="low">100만원 이하</option>
+                  <option value="mid" selected>100-180만원</option>
+                  <option value="high">180만원 이상</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="duration">희망 기간</label>
+                <select id="duration" name="duration">
+                  <option>2주</option>
+                  <option selected>한 달</option>
+                  <option>두 달 이상</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field">
+              <label for="workType">업무 형태</label>
+              <select id="workType" name="workType">
+                <option value="remote" selected>재택근무 가능</option>
+                <option value="hybrid">주 2-3회 외부 미팅</option>
+                <option value="break">휴식/전환 목적</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <div class="choice-title">선호 분위기</div>
+              <div class="choice-group" data-choice-group="mood">
+                <button class="choice selected" type="button" data-value="sea">바다</button>
+                <button class="choice selected" type="button" data-value="quiet">조용한</button>
+                <button class="choice" type="button" data-value="alley">골목</button>
+                <button class="choice" type="button" data-value="night">야경</button>
+                <button class="choice selected" type="button" data-value="cafe">카페</button>
+                <button class="choice" type="button" data-value="art">예술</button>
+                <button class="choice" type="button" data-value="nature">자연·숲</button>
+                <button class="choice" type="button" data-value="lake">호수·강</button>
+                <button class="choice" type="button" data-value="mountain">산·등산</button>
+                <button class="choice" type="button" data-value="tradition">전통·한옥</button>
+                <button class="choice" type="button" data-value="market">전통시장</button>
+                <button class="choice" type="button" data-value="food">맛집·먹거리</button>
+                <button class="choice" type="button" data-value="festival">축제·공연</button>
+                <button class="add-chip" type="button" data-add-group="mood">+ 추가</button>
+                <input type="text" class="add-input" data-add-group="mood" placeholder="입력 후 Enter" maxlength="14" hidden />
+              </div>
+            </div>
+
+            <div class="field">
+              <div class="choice-title">중요한 조건</div>
+              <div class="choice-group" data-choice-group="priority">
+                <button class="choice selected" type="button" data-value="workspace">작업 공간</button>
+                <button class="choice selected" type="button" data-value="walk">산책 동선</button>
+                <button class="choice" type="button" data-value="cost">생활비</button>
+                <button class="choice selected" type="button" data-value="nightSafe">저녁 이동</button>
+                <button class="choice" type="button" data-value="project">로컬 프로젝트</button>
+                <button class="choice" type="button" data-value="transit">대중교통</button>
+                <button class="choice" type="button" data-value="internet">빠른 인터넷</button>
+                <button class="choice" type="button" data-value="medical">의료 접근</button>
+                <button class="choice" type="button" data-value="pet">반려동물</button>
+                <button class="choice" type="button" data-value="fitness">운동 시설</button>
+                <button class="choice" type="button" data-value="community">커뮤니티</button>
+                <button class="add-chip" type="button" data-add-group="priority">+ 추가</button>
+                <input type="text" class="add-input" data-add-group="priority" placeholder="입력 후 Enter" maxlength="14" hidden />
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button class="primary" type="submit">프로필 저장하고 추천받기</button>
+              <button class="ghost" type="button" id="resetProfile">초기화</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="recommend recommend-empty" id="recommendEmpty">
+          <span class="empty-icon" aria-hidden="true">✦</span>
+          <div>
+            <b>아직 추천이 없어요</b>
+            <p>위에서 이름·취향·조건을 입력하고 <strong>프로필 저장하고 추천받기</strong>를 누르면, 나에게 맞는 지역과 30일 계획이 여기에 나타납니다.</p>
+          </div>
+        </div>
+
+        <div class="recommend match-loading" id="recommendLoading" hidden>
+          <span class="loading-spinner" aria-hidden="true"></span>
+          <div>
+            <b>AI가 추천을 만드는 중...</b>
+            <p>추천 문장과 30일 계획을 보강하고 있어요. 잠시만 기다려 주세요.</p>
+          </div>
+        </div>
+
+        <div class="recommend match-card result-block" id="matchResult" hidden>
+          <div class="match-banner">
+            <img id="matchImage" alt="" />
+            <div class="match-banner-overlay">
+              <span class="match-eyebrow">✦ AI Lifestyle Match</span>
+              <div class="match-headline">
+                <h2 id="matchTitle">부산 영도</h2>
+                <span class="score-badge" id="matchScore">94%</span>
+              </div>
+            </div>
+          </div>
+          <div class="match-body">
+            <p id="matchDescription">바다 산책, 조용한 체류 분위기, 로컬 카페, 디자인 연계 활동 가능성이 지민님의 조건과 가장 잘 맞습니다.</p>
+            <p class="check-title">체류 전 확인할 점</p>
+            <ul id="checkList">
+              <li>체류 전 숙소 인터넷 환경 확인</li>
+              <li>저녁 시간대 이동 동선과 주변 시설 확인</li>
+              <li>예산 범위 내 한 달 숙소 여부 확인</li>
+            </ul>
+            <div class="candidate-list" id="candidateList"></div>
+            <p class="ai-status" id="aiStatus">로컬 추천 엔진 사용 중</p>
+          </div>
+        </div>
+
+        <div class="recommend result-block" hidden>
+          <div class="result-score">
+            <h2 id="localLinkTitle">Local Link · 직무 기반 로컬 프로젝트</h2>
+          </div>
+          <p id="localLinkLead">직무와 관심사를 활용해 지역과 연결되는 프로젝트입니다. 단순 소비자가 아닌 지역 참여자로 머무는 경험을 제안합니다.</p>
+          <div class="local-link-list" id="localLinkList"></div>
+        </div>
+
+        <div class="recommend result-block" hidden>
+          <h2>30일 로컬 라이프 시뮬레이션</h2>
+          <div class="timeline" id="timeline">
+            <div class="week"><b>1주 차 · 생활 적응</b><p>숙소 주변 동선, 작업 가능한 카페, 마트 루트를 확인합니다.</p></div>
+            <div class="week"><b>2주 차 · 지역 경험</b><p>바다 산책 루트와 로컬 상점, 소규모 모임을 추천합니다.</p></div>
+            <div class="week"><b>3주 차 · 지역 연결</b><p>카페 이용 경험 개선, 행사 콘텐츠 제작 같은 UX 프로젝트를 매칭합니다.</p></div>
+            <div class="week"><b>4주 차 · 다음 경로</b><p>체류 만족도와 재방문 시기를 기록해 장기 체류 가능성을 탐색합니다.</p></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <nav class="bottom-nav on-feed" aria-label="하단 메뉴">
+      <button class="nav-btn active" data-tab="home"><span class="nav-icon">⌂</span><span>홈</span></button>
+      <button class="nav-btn" data-tab="explore"><span class="nav-icon">⌕</span><span>탐색</span></button>
+      <button class="nav-btn" data-tab="stay"><span class="nav-icon">☗</span><span>숙소</span></button>
+      <button class="nav-btn" data-tab="jobs"><span class="nav-icon">▣</span><span>일자리</span></button>
+      <button class="nav-btn" data-tab="profile"><span class="nav-icon">♙</span><span>내정보</span></button>
+    </nav>
+
+    <div class="toast" id="toast" hidden></div>
+
+    <div class="app-modal" id="aboutModal" hidden>
+      <div class="app-modal-backdrop" data-close></div>
+      <div class="app-modal-card" role="dialog" aria-modal="true" aria-label="일단 살아봄 소개">
+        <span class="app-modal-grip" aria-hidden="true"></span>
+        <button class="app-modal-close" type="button" data-close aria-label="닫기">×</button>
+        <div class="app-about-head">
+          <img class="brand-logo" src="assets/images/logo.png" alt="일단 살아봄 로고" />
+          <div>
+            <h2>일단 살아봄</h2>
+            <p class="app-about-tagline">나에게 맞는 지역에서, 한 달 살아보기</p>
+          </div>
+        </div>
+        <p class="app-about-lead">청년이 자신과 맞는 지역을 발견하고, 한달살기·워케이션을 미리 체험하며, 지역과 실제로 연결되도록 돕는 서비스입니다. 관광지·숙소가 아니라 <strong>“여기서 살아보는 하루”</strong>를 보여줍니다.</p>
+        <ul class="app-about-features">
+          <li><b>✦ AI Lifestyle Match</b><span>취향·업무 조건·예산을 분석해 나와 맞는 지역을 추천합니다.</span></li>
+          <li><b>▣ Mood Feed</b><span>릴스형 숏폼으로 지역의 하루 분위기를 넘겨보며 체감합니다.</span></li>
+          <li><b>≈ Drone Living View</b><span>드론·지상 동선 영상으로 숙소 주변 생활권을 입체적으로 확인합니다.</span></li>
+          <li><b>⌂ Local Link</b><span>직무·관심사 기반 로컬 프로젝트로 지역과 연결됩니다.</span></li>
+        </ul>
+        <button class="primary app-about-cta" type="button" data-close-tab="profile">내 프로필로 추천받기 →</button>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const screens = document.querySelectorAll(".screen");
+    const nav = document.querySelector(".bottom-nav");
+    const navButtons = document.querySelectorAll("[data-tab]");
+    const stories = document.querySelectorAll(".story");
+    const rail = document.querySelectorAll(".mini-rail span");
+    const form = document.getElementById("profileForm");
+    const resetProfile = document.getElementById("resetProfile");
+    const profileGreeting = document.getElementById("profileGreeting");
+    const matchTitle = document.getElementById("matchTitle");
+    const matchScore = document.getElementById("matchScore");
+    const matchImage = document.getElementById("matchImage");
+    const matchDescription = document.getElementById("matchDescription");
+    const checkList = document.getElementById("checkList");
+    const candidateList = document.getElementById("candidateList");
+    const aiStatus = document.getElementById("aiStatus");
+    const timeline = document.getElementById("timeline");
+    const localLinkList = document.getElementById("localLinkList");
+    const searchInput = document.getElementById("searchInput");
+    const searchResultNote = document.getElementById("searchResultNote");
+    const noResults = document.getElementById("noResults");
+    const categoryButtons = document.querySelectorAll(".category[data-filter]");
+    const regionDetail = document.getElementById("regionDetail");
+    const detailImage = document.getElementById("detailImage");
+    const detailTitle = document.getElementById("detailTitle");
+    const detailDescription = document.getElementById("detailDescription");
+    const detailMood = document.getElementById("detailMood");
+    const detailCheck = document.getElementById("detailCheck");
+    const detailChips = document.getElementById("detailChips");
+    const detailTimeline = document.getElementById("detailTimeline");
+    const droneCanvas = document.getElementById("droneCanvas");
+    const droneCaptionTitle = document.getElementById("droneCaptionTitle");
+    const droneCaptionText = document.getElementById("droneCaptionText");
+    const livingList = document.getElementById("livingList");
+    const naturePin = document.getElementById("naturePin");
+    const droneModeButtons = document.querySelectorAll("[data-drone-mode]");
+    const droneTimeButtons = document.querySelectorAll("[data-drone-time]");
+    const jobRegion = document.getElementById("jobRegion");
+    const jobCount = document.getElementById("jobCount");
+    const jobList = document.getElementById("jobList");
+    const jobMap = document.getElementById("jobMap");
+    const stayRegion = document.getElementById("stayRegion");
+    const stayList = document.getElementById("stayList");
+    const stayMap = document.getElementById("stayMap");
+    const feedLike = document.getElementById("feedLike");
+    const feedLikeCount = document.getElementById("feedLikeCount");
+    const feedShare = document.getElementById("feedShare");
+    let currentStory = 0;
+
+    const regions = [
+      {
+        name: "부산 영도",
+        base: 72,
+        tags: ["sea", "quiet", "cafe", "walk", "workspace", "project"],
+        description: "바다 산책, 조용한 체류 분위기, 로컬 카페, 직무 기반 프로젝트 참여 가능성이 조건과 가장 잘 맞습니다.",
+        checks: ["선택 숙소의 인터넷 환경", "저녁 시간대 이동 동선과 주변 시설", "예산 범위 내 한 달 숙소 여부"]
+      },
+      {
+        name: "강릉 안목해변",
+        base: 70,
+        tags: ["sea", "cafe", "workspace", "walk", "quiet"],
+        description: "해변 중심의 워케이션, 카페 작업 환경, 아침 산책 루트가 체류 조건과 잘 맞습니다.",
+        checks: ["카페 혼잡 시간대", "성수기 숙소 비용", "숙소에서 작업 공간까지 도보 거리"]
+      },
+      {
+        name: "전주 한옥마을 외곽",
+        base: 66,
+        tags: ["alley", "quiet", "art", "walk", "cost"],
+        description: "느린 골목 산책, 문화생활, 비교적 안정적인 생활비를 중요하게 보는 조건에 적합합니다.",
+        checks: ["관광지 혼잡 구간", "야간 이동 동선", "장기 숙박 가능 숙소"]
+      },
+      {
+        name: "서울 익선동",
+        base: 62,
+        tags: ["alley", "night", "cafe", "art", "workspace"],
+        description: "야경과 골목 분위기, 도심 편의성, 카페 작업 환경을 중시할 때 적합합니다.",
+        checks: ["숙소 방음과 혼잡도", "한 달 예산 초과 가능성", "휴식 목적과 도심 자극의 균형"]
+      },
+      {
+        name: "통영 봉평동",
+        base: 68,
+        tags: ["sea", "art", "walk", "project", "quiet"],
+        description: "항구 산책, 예술마을 분위기, 로컬 프로젝트 참여를 함께 경험하기 좋은 체류지입니다.",
+        checks: ["숙소에서 항구와 작업 공간까지 거리", "비수기 교통편", "참여 가능한 문화 프로젝트 일정"]
+      },
+      {
+        name: "속초 청초호",
+        base: 69,
+        tags: ["sea", "cafe", "workspace", "walk", "quiet"],
+        description: "호수 산책과 바다 접근성, 카페 작업 환경을 균형 있게 원하는 사용자에게 적합합니다.",
+        checks: ["성수기 숙박비", "카페 작업 가능 시간", "시장 주변 혼잡도"]
+      },
+      {
+        name: "제주 구좌",
+        base: 67,
+        tags: ["sea", "quiet", "cafe", "walk"],
+        description: "조용한 마을, 오름과 바다, 혼자 머물기 좋은 작은 공간을 원하는 조건에 잘 맞습니다.",
+        checks: ["렌터카 또는 버스 이동 계획", "장보기 동선", "날씨에 따른 작업 공간 대안"]
+      },
+      {
+        name: "목포 원도심",
+        base: 64,
+        tags: ["alley", "night", "art", "cost", "walk"],
+        description: "구도심 골목, 항구 야경, 낮은 생활비와 문화 탐색을 함께 보고 싶은 사용자에게 적합합니다.",
+        checks: ["야간 이동 경로", "장기 숙소 상태", "작업 가능한 실내 공간"]
+      },
+      {
+        name: "춘천 소양강",
+        base: 65,
+        tags: ["cafe", "workspace", "walk", "quiet"],
+        description: "서울 접근성, 호수 산책, 카페 작업 환경을 함께 원하는 짧은 체류에 어울립니다.",
+        checks: ["주말 관광객 혼잡도", "기차역과 숙소 거리", "작업 가능한 카페 좌석"]
+      },
+      {
+        name: "군산 월명동",
+        base: 67,
+        tags: ["alley", "art", "cost", "walk", "quiet"],
+        description: "근대 골목, 낮은 생활비, 조용한 카페와 문화공간을 함께 탐색하기 좋은 체류지입니다.",
+        checks: ["야간 이동 동선", "장기 숙소 상태", "작업 가능한 카페 영업시간"]
+      },
+      {
+        name: "여수 고소동",
+        base: 66,
+        tags: ["sea", "alley", "night", "cafe", "walk"],
+        description: "바다 전망, 벽화 골목, 야경 산책을 함께 원하는 사용자에게 어울리는 지역입니다.",
+        checks: ["언덕길 이동 부담", "성수기 숙박비", "저녁 귀가 동선"]
+      },
+      {
+        name: "순천 조례호수공원",
+        base: 65,
+        tags: ["quiet", "walk", "workspace", "cost"],
+        description: "호수 산책, 안정적인 생활권, 비교적 부담 낮은 체류 조건을 원하는 사용자에게 적합합니다.",
+        checks: ["숙소와 호수공원 거리", "대중교통 동선", "작업 공간 선택지"]
+      }
+    ];
+
+    const defaults = {
+      userName: "",
+      job: "",
+      budget: "mid",
+      duration: "한 달",
+      workType: "remote",
+      mood: ["sea", "quiet", "cafe"],
+      priority: ["workspace", "walk", "nightSafe"]
+    };
+
+    const defaultSceneryImage = "https://commons.wikimedia.org/wiki/Special:FilePath/Anmok%20Beach%2020220430%20009.jpg";
+    const img = {
+      gamcheon: "https://commons.wikimedia.org/wiki/Special:FilePath/Colorful%20houses%20in%20Gamcheon%20Culture%20Village%20at%20sunset%20in%20Busan%20South%20Korea.jpg",
+      anmok: "https://commons.wikimedia.org/wiki/Special:FilePath/Anmok%20Beach%2020220430%20009.jpg",
+      hanok: "https://commons.wikimedia.org/wiki/Special:FilePath/Jeonju%20Hanok%20Maeul%2001.jpg",
+      lake: "https://commons.wikimedia.org/wiki/Special:FilePath/Cheongchoho%202019.jpg",
+      night: "https://commons.wikimedia.org/wiki/Special:FilePath/Yeosu%20by%20night.jpg",
+      jeju: "https://commons.wikimedia.org/wiki/Special:FilePath/Jusangjeollidae%20jeju%20korea%201.jpg",
+      port: "https://commons.wikimedia.org/wiki/Special:FilePath/Korea-Tongyeong%20Port-Turtle%20ship%20replica-01.jpg"
+    };
+
+    const regionImages = {
+      "부산 영도": img.gamcheon,
+      "강릉 안목해변": img.anmok,
+      "전주 한옥마을 외곽": img.hanok,
+      "서울 익선동": img.night,
+      "통영 봉평동": img.port,
+      "속초 청초호": img.lake,
+      "제주 구좌": img.jeju,
+      "목포 원도심": img.night,
+      "춘천 소양강": img.lake,
+      "군산 월명동": img.hanok,
+      "여수 고소동": img.night,
+      "순천 조례호수공원": img.lake
+    };
+
+    const jobsByRegion = {
+      "강릉 안목해변": [
+        { title: "카페 주말 스태프", place: "안목 커피거리 · 브루잉 라운지", pay: "시급 12,000원", time: "토/일 10:00-18:00", walk: "도보 7분", image: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1000&q=80", tags: ["감성 카페", "바리스타 경험 우대", "주말만"], mood: ["조용함", "힐링", "감성적"] },
+        { title: "게스트하우스 체크인 보조", place: "안목해변 · 바다뷰 게스트하우스", pay: "시급 13,000원", time: "평일 17:00-21:00", walk: "도보 5분", image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1000&q=80", tags: ["유연 근무", "영어 가능자 우대"], mood: ["자유로움", "국제적", "활기참"] },
+        { title: "해변 플리마켓 운영 보조", place: "안목해변 산책로 · 주말마켓", pay: "일급 85,000원", time: "토 11:00-19:00", walk: "도보 9분", image: "https://commons.wikimedia.org/wiki/Special:FilePath/Anmok%20Beach%2020220430%20009.jpg", tags: ["단기", "행사 운영", "야외"], mood: ["밝음", "활기참", "바다"] }
+      ],
+      "부산 영도": [
+        { title: "로컬 카페 UX 피드백", place: "흰여울문화마을 · 오션뷰 카페", pay: "건당 80,000원", time: "협의 가능", walk: "도보 8분", image: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1000&q=80", tags: ["UX", "리뷰 작성", "포트폴리오"], mood: ["차분함", "창의적", "바다"] },
+        { title: "게스트하우스 콘텐츠 보조", place: "영도 봉래동 · 스테이 운영팀", pay: "시급 12,500원", time: "평일 15:00-20:00", walk: "도보 12분", image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1000&q=80", tags: ["SNS", "사진 정리", "장기 우대"], mood: ["자유로움", "로컬", "친근함"] },
+        { title: "마을 투어 접수 스태프", place: "흰여울길 · 로컬 투어", pay: "일급 90,000원", time: "주말 09:30-17:30", walk: "도보 10분", image: "https://commons.wikimedia.org/wiki/Special:FilePath/Jeonju%20Hanok%20Maeul%2001.jpg", tags: ["주말", "응대", "산책로"], mood: ["활기참", "관광", "친절함"] }
+      ],
+      "서울 익선동": [
+        { title: "한옥 카페 홀 스태프", place: "익선동 골목 · 한옥 디저트바", pay: "시급 12,000원", time: "평일 18:00-22:00", walk: "도보 4분", image: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1000&q=80", tags: ["저녁", "도심", "카페"], mood: ["분주함", "감성적", "도심"] },
+        { title: "전시 팝업 안내", place: "익선동 · 소규모 갤러리", pay: "일급 95,000원", time: "금/토 12:00-20:00", walk: "도보 6분", image: "https://commons.wikimedia.org/wiki/Special:FilePath/Cheongchoho%202019.jpg", tags: ["예술", "팝업", "단기"], mood: ["세련됨", "문화적", "활기참"] }
+      ],
+      "전주 한옥마을 외곽": [
+        { title: "한옥스테이 예약 안내", place: "교동 외곽 · 한옥 스테이", pay: "시급 11,500원", time: "평일 16:00-21:00", walk: "도보 7분", image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1000&q=80", tags: ["예약", "숙소", "조용함"], mood: ["차분함", "전통적", "친근함"] },
+        { title: "문화공간 SNS 카드뉴스", place: "전주 객사길 · 문화 라운지", pay: "건당 100,000원", time: "원격 협의", walk: "도보 14분", image: "https://commons.wikimedia.org/wiki/Special:FilePath/Jeonju%20Hanok%20Maeul%2001.jpg", tags: ["디자인", "콘텐츠", "원격 가능"], mood: ["창의적", "문화적", "느긋함"] }
+      ],
+      "통영 봉평동": [
+        { title: "공방 체험 보조", place: "봉평동 · 로컬 공방", pay: "시급 12,000원", time: "주말 13:00-18:00", walk: "도보 6분", image: "https://commons.wikimedia.org/wiki/Special:FilePath/Jeonju%20Hanok%20Maeul%2001.jpg", tags: ["예술", "체험", "주말"], mood: ["창의적", "따뜻함", "로컬"] },
+        { title: "항구 카페 오픈 보조", place: "통영항 근처 · 작은 카페", pay: "시급 11,800원", time: "평일 08:00-12:00", walk: "도보 11분", image: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1000&q=80", tags: ["오전", "카페", "바다"], mood: ["조용함", "상쾌함", "느긋함"] }
+      ],
+      "속초 청초호": [
+        { title: "시장 푸드투어 접수", place: "속초관광수산시장 · 투어 데스크", pay: "일급 88,000원", time: "토/일 10:00-17:00", walk: "도보 13분", image: "https://commons.wikimedia.org/wiki/Special:FilePath/Anmok%20Beach%2020220430%20009.jpg", tags: ["시장", "관광", "주말"], mood: ["활기참", "친근함", "분주함"] },
+        { title: "호수 카페 마감 스태프", place: "청초호 · 워케이션 카페", pay: "시급 12,300원", time: "평일 17:00-22:00", walk: "도보 8분", image: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1000&q=80", tags: ["카페", "마감", "저녁"], mood: ["차분함", "호수", "감성적"] }
+      ],
+      "제주 구좌": [
+        { title: "독립서점 운영 보조", place: "구좌읍 · 작은 책방", pay: "시급 11,500원", time: "수-금 13:00-18:00", walk: "도보 15분", image: "https://commons.wikimedia.org/wiki/Special:FilePath/Jeonju%20Hanok%20Maeul%2001.jpg", tags: ["책방", "조용함", "장기 우대"], mood: ["고요함", "혼자", "느긋함"] },
+        { title: "오름 투어 예약 정리", place: "구좌 · 로컬 투어 사무실", pay: "건당 70,000원", time: "원격 협의", walk: "도보 10분", image: "https://commons.wikimedia.org/wiki/Special:FilePath/Anmok%20Beach%2020220430%20009.jpg", tags: ["원격 가능", "예약", "자연"], mood: ["자유로움", "자연", "차분함"] }
+      ],
+      "목포 원도심": [
+        { title: "구도심 숙소 체크인", place: "목포역 근처 · 레트로 스테이", pay: "시급 12,000원", time: "평일 18:00-22:00", walk: "도보 6분", image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1000&q=80", tags: ["숙소", "저녁", "응대"], mood: ["레트로", "차분함", "도심"] },
+        { title: "항구 야시장 운영 보조", place: "목포항 · 야시장 부스", pay: "일급 92,000원", time: "금/토 16:00-23:00", walk: "도보 12분", image: "https://commons.wikimedia.org/wiki/Special:FilePath/Cheongchoho%202019.jpg", tags: ["야간", "행사", "활기"], mood: ["분주함", "야경", "활기참"] }
+      ],
+      "춘천 소양강": [
+        { title: "호수 카페 브런치 보조", place: "소양강 근처 · 브런치 카페", pay: "시급 12,000원", time: "주말 09:00-15:00", walk: "도보 9분", image: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1000&q=80", tags: ["브런치", "카페", "주말"], mood: ["밝음", "호수", "편안함"] },
+        { title: "로컬 클래스 접수", place: "춘천 문화공간 · 주말 클래스", pay: "일급 80,000원", time: "토 12:00-18:00", walk: "도보 11분", image: "https://commons.wikimedia.org/wiki/Special:FilePath/Jeonju%20Hanok%20Maeul%2001.jpg", tags: ["문화", "클래스", "단기"], mood: ["문화적", "친근함", "차분함"] }
+      ],
+      "군산 월명동": [
+        { title: "근대골목 카페 보조", place: "월명동 · 로스터리 카페", pay: "시급 11,800원", time: "평일 13:00-18:00", walk: "도보 6분", image: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1000&q=80", tags: ["카페", "골목", "조용함"], mood: ["차분함", "레트로", "느긋함"] },
+        { title: "문화공간 안내 보조", place: "군산 근대문화거리 · 전시 라운지", pay: "일급 78,000원", time: "토 11:00-18:00", walk: "도보 9분", image: "https://commons.wikimedia.org/wiki/Special:FilePath/Jeonju%20Hanok%20Maeul%2001.jpg", tags: ["문화", "주말", "안내"], mood: ["문화적", "조용함", "친근함"] }
+      ],
+      "여수 고소동": [
+        { title: "전망 카페 마감 스태프", place: "고소동 벽화마을 · 오션뷰 카페", pay: "시급 12,300원", time: "평일 17:00-22:00", walk: "도보 8분", image: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1000&q=80", tags: ["야경", "카페", "저녁"], mood: ["감성적", "바다", "차분함"] },
+        { title: "야경 산책 투어 접수", place: "고소동 · 야경 산책 코스", pay: "일급 86,000원", time: "금/토 16:00-22:00", walk: "도보 10분", image: "https://commons.wikimedia.org/wiki/Special:FilePath/Yeosu%20by%20night.jpg", tags: ["야간", "투어", "주말"], mood: ["활기참", "야경", "관광"] }
+      ],
+      "순천 조례호수공원": [
+        { title: "호수공원 카페 오전 보조", place: "조례호수공원 · 브런치 카페", pay: "시급 11,700원", time: "평일 09:00-14:00", walk: "도보 7분", image: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1000&q=80", tags: ["오전", "카페", "호수"], mood: ["조용함", "편안함", "밝음"] },
+        { title: "생활권 리서치 기록", place: "조례동 · 로컬 편집팀", pay: "건당 75,000원", time: "원격 협의", walk: "도보 12분", image: "https://commons.wikimedia.org/wiki/Special:FilePath/Cheongchoho%202019.jpg", tags: ["리서치", "원격 가능", "생활권"], mood: ["차분함", "분석적", "자유로움"] }
+      ]
+    };
+
+    const livingViews = {
+      "부산 영도": {
+        nature: "바다길",
+        rows: [
+          ["숙소 구조", "흰여울길 근처 숙소를 기준으로 카페, 편의점, 바다 산책로가 도보권에 모입니다."],
+          ["주요 동선", "숙소에서 작업 카페까지 약 8분, 마트까지 약 10분, 바다 산책로까지 약 5분을 가정합니다."],
+          ["자연 접근", "바다와 절벽 산책로가 가까워 아침/저녁 루틴을 만들기 쉽습니다."],
+          ["업무 공간", "오션뷰 카페와 조용한 로컬 카페를 시간대별로 나눠 확인합니다."]
+        ],
+        drone: {
+          day: ["드론 생활권", "바다 산책로, 숙소, 로컬카페, 마트가 한눈에 들어오는 구조를 확인합니다."],
+          evening: ["저녁 생활권", "해질녘 산책로와 숙소 귀가 동선을 중심으로 조명과 주변 시설을 확인합니다."]
+        },
+        ground: {
+          day: ["지상 도보 동선", "골목 경사, 횡단 위치, 카페 입구, 마트 접근성을 실제 보행 순서로 점검합니다."],
+          evening: ["저녁 귀가 동선", "늦은 시간 운영 시설과 밝은 골목을 기준으로 부담 없는 이동 경로를 봅니다."]
+        }
+      },
+      "강릉 안목해변": {
+        nature: "해변",
+        rows: [
+          ["숙소 구조", "해변 숙소를 기준으로 커피거리, 편의점, 버스 정류장이 가까운지 확인합니다."],
+          ["주요 동선", "숙소에서 작업 카페까지 약 7분, 마트까지 약 12분, 해변 산책로까지 약 3분입니다."],
+          ["자연 접근", "아침 바다 산책과 오후 카페 작업을 연결하기 좋습니다."],
+          ["업무 공간", "카페 혼잡 시간과 콘센트, 와이파이 사용 가능 여부를 함께 봅니다."]
+        ],
+        drone: {
+          day: ["해변 중심 생활권", "바다, 카페거리, 숙소 위치를 넓게 보며 워케이션 반경을 확인합니다."],
+          evening: ["해변 저녁 분위기", "해질녘 산책 동선과 카페 마감 시간 이후 귀가 흐름을 확인합니다."]
+        },
+        ground: {
+          day: ["카페 접근 경로", "숙소에서 카페까지 횡단보도, 보행로, 해변 진입로를 순서대로 확인합니다."],
+          evening: ["야간 보행 확인", "해변가 조명, 편의점 위치, 택시 승하차 지점을 함께 봅니다."]
+        }
+      },
+      "서울 익선동": {
+        nature: "골목",
+        rows: [
+          ["숙소 구조", "한옥 골목 숙소를 기준으로 카페, 식당, 지하철역, 편의점 밀도를 확인합니다."],
+          ["주요 동선", "작업 카페와 전시 공간은 가깝지만 혼잡 시간대 회피가 중요합니다."],
+          ["자연 접근", "자연보다 도심 골목과 문화공간 접근성이 강점입니다."],
+          ["업무 공간", "낮에는 조용한 카페, 저녁에는 혼잡도가 낮은 공간을 따로 확인합니다."]
+        ],
+        drone: {
+          day: ["도심 생활권", "골목, 역, 카페, 전시 공간이 촘촘한 생활권인지 확인합니다."],
+          evening: ["야경과 혼잡도", "야간 분위기와 귀가 경로, 붐비는 골목 구간을 함께 봅니다."]
+        },
+        ground: {
+          day: ["골목 이동", "좁은 보행로, 카페 입구, 식사 동선을 실제 도보 기준으로 확인합니다."],
+          evening: ["저녁 골목", "야경은 좋지만 혼잡할 수 있어 숙소까지의 조용한 우회 동선을 확인합니다."]
+        }
+      },
+      default: {
+        nature: "산책로",
+        rows: [
+          ["숙소 구조", "숙소, 작업 공간, 마트, 산책로가 도보 생활권에 들어오는지 확인합니다."],
+          ["주요 동선", "숙소에서 카페와 생활시설까지 실제 걸리는 시간과 길의 분위기를 봅니다."],
+          ["자연 접근", "바다, 호수, 오름, 골목 등 지역별 쉼 공간까지의 거리감을 확인합니다."],
+          ["업무 공간", "작업 가능한 카페와 조용한 실내 공간의 위치를 함께 표시합니다."]
+        ],
+        drone: {
+          day: ["드론 생활권", "지역 전체의 공간감과 숙소 주변 구조를 넓게 확인합니다."],
+          evening: ["저녁 생활권", "해질녘 분위기, 조명, 귀가 동선, 운영 시설을 확인합니다."]
+        },
+        ground: {
+          day: ["지상 이동", "골목, 횡단보도, 카페, 마트 접근 경로를 실제 걷는 순서로 봅니다."],
+          evening: ["저녁 이동", "야간 이동 부담을 줄일 수 있는 밝은 길과 가까운 시설을 확인합니다."]
+        }
+      }
+    };
+
+    const mapBounds = { lngMin: 125.8, lngMax: 130.0, latMin: 33.0, latMax: 38.8 };
+    const mapCosLat = Math.cos(35.9 * Math.PI / 180);
+    const mapK = 100 / (mapBounds.latMax - mapBounds.latMin);
+    const mapVbW = (mapBounds.lngMax - mapBounds.lngMin) * mapCosLat * mapK;
+
+    function projectMap(lng, lat) {
+      return {
+        x: (lng - mapBounds.lngMin) * mapCosLat * mapK,
+        y: (mapBounds.latMax - lat) * mapK
+      };
+    }
+
+    function mapPath(coords) {
+      return coords.map((c, i) => {
+        const p = projectMap(c[0], c[1]);
+        return `${i ? "L" : "M"}${p.x.toFixed(2)} ${p.y.toFixed(2)}`;
+      }).join(" ") + " Z";
+    }
+
+    // 위경도 기반 남한 본토 외곽선 (시계방향: 북서 → 동해안 → 남해안 → 서해안)
+    const koreaMainland = [
+      [126.50, 37.74], [126.80, 37.95], [127.20, 38.15], [127.80, 38.32], [128.36, 38.62],
+      [128.59, 38.20], [128.92, 37.77], [129.13, 37.45], [129.42, 36.99], [129.45, 36.42],
+      [129.57, 36.05], [129.42, 35.68], [129.38, 35.48], [129.22, 35.22], [129.08, 35.05],
+      [128.65, 34.92], [128.42, 34.78], [128.05, 34.93], [127.90, 34.70], [127.75, 34.58],
+      [127.55, 34.86], [127.25, 34.45], [126.95, 34.58], [126.55, 34.32], [126.30, 34.48],
+      [126.39, 34.79], [126.44, 35.30], [126.42, 35.62], [126.58, 35.98], [126.48, 36.40],
+      [126.18, 36.78], [126.58, 36.95], [126.55, 37.25], [126.45, 37.45]
+    ];
+    const koreaJeju = [
+      [126.15, 33.40], [126.30, 33.52], [126.55, 33.56], [126.85, 33.52],
+      [127.00, 33.40], [126.85, 33.28], [126.55, 33.22], [126.30, 33.28]
+    ];
+
+    // 핀: 지역명(data-job-region) + 위경도 + 표시 라벨
+    const mapCities = [
+      { region: "속초 청초호", label: "속초", lng: 128.591, lat: 38.207 },
+      { region: "춘천 소양강", label: "춘천", lng: 127.730, lat: 37.881 },
+      { region: "서울 익선동", label: "서울", lng: 126.991, lat: 37.574 },
+      { region: "강릉 안목해변", label: "강릉", lng: 128.918, lat: 37.770 },
+      { region: "군산 월명동", label: "군산", lng: 126.711, lat: 35.978 },
+      { region: "전주 한옥마을 외곽", label: "전주", lng: 127.152, lat: 35.815 },
+      { region: "부산 영도", label: "부산", lng: 129.068, lat: 35.091 },
+      { region: "통영 봉평동", label: "통영", lng: 128.420, lat: 34.845 },
+      { region: "순천 조례호수공원", label: "순천", lng: 127.516, lat: 34.954 },
+      { region: "여수 고소동", label: "여수", lng: 127.738, lat: 34.738 },
+      { region: "목포 원도심", label: "목포", lng: 126.392, lat: 34.789 },
+      { region: "제주 구좌", label: "제주", lng: 126.852, lat: 33.554 }
+    ];
+    const cityCoords = Object.fromEntries(mapCities.map(c => [c.region, [c.lng, c.lat]]));
+
+    function addMapPin(region, label, lng, lat) {
+      if (document.querySelector(`[data-job-region="${region}"]`)) return;
+      const pin = document.createElement("button");
+      pin.type = "button";
+      pin.className = "map-region";
+      pin.dataset.jobRegion = region;
+      if (typeof lng === "number") {
+        const p = projectMap(lng, lat);
+        pin.style.left = `${(p.x / mapVbW) * 100}%`;
+        pin.style.top = `${p.y}%`;
+      } else {
+        pin.style.left = "7%";
+        pin.style.top = "44%";
+      }
+      pin.innerHTML = `<span class="dot"></span><span class="lbl">${label}<small>0</small></span>`;
+      jobMap.append(pin);
+    }
+
+    function buildKoreaSvg() {
+      const svgNS = "http://www.w3.org/2000/svg";
+      const svg = document.createElementNS(svgNS, "svg");
+      svg.setAttribute("class", "korea-svg");
+      svg.setAttribute("viewBox", `0 0 ${mapVbW.toFixed(2)} 100`);
+      svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+      [koreaMainland, koreaJeju].forEach(coords => {
+        const path = document.createElementNS(svgNS, "path");
+        path.setAttribute("class", "land");
+        path.setAttribute("d", mapPath(coords));
+        svg.append(path);
+      });
+      return svg;
+    }
+
+    function renderKoreaMap() {
+      jobMap.style.width = `${(412 * mapVbW / 100).toFixed(0)}px`;
+      jobMap.innerHTML = "";
+      jobMap.append(buildKoreaSvg());
+      mapCities.forEach(c => addMapPin(c.region, c.label, c.lng, c.lat));
+    }
+
+    function renderStayMap() {
+      stayMap.style.width = `${(412 * mapVbW / 100).toFixed(0)}px`;
+      stayMap.innerHTML = "";
+      stayMap.append(buildKoreaSvg());
+      mapCities.forEach(c => {
+        const count = (lodgingsByRegion[c.region] || buildGenericLodgings(c.region)).length;
+        const pin = document.createElement("button");
+        pin.type = "button";
+        pin.className = "map-region";
+        pin.dataset.stayPin = c.region;
+        const p = projectMap(c.lng, c.lat);
+        pin.style.left = `${(p.x / mapVbW) * 100}%`;
+        pin.style.top = `${p.y}%`;
+        pin.innerHTML = `<span class="dot"></span><span class="lbl">${c.label}<small>${count}</small></span>`;
+        stayMap.append(pin);
+      });
+    }
+
+    function openTab(tab) {
+      screens.forEach(screen => screen.classList.toggle("active", screen.dataset.screen === tab));
+      document.querySelectorAll(".nav-btn").forEach(button => {
+        button.classList.toggle("active", button.dataset.tab === tab);
+      });
+      nav.classList.toggle("on-feed", tab === "home");
+    }
+
+    navButtons.forEach(button => {
+      button.addEventListener("click", () => openTab(button.dataset.tab));
+    });
+
+    function normalizeText(value) {
+      return value.toLowerCase().replace(/\s+/g, "");
+    }
+
+    function filterRegions(query) {
+      const terms = query
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean)
+        .map(normalizeText);
+      let visibleCount = 0;
+
+      document.querySelectorAll(".region-card").forEach(card => {
+        const target = normalizeText(`${card.textContent} ${card.dataset.search || ""}`);
+        const visible = terms.length === 0 || terms.every(term => target.includes(term));
+        card.classList.toggle("hidden", !visible);
+        if (visible) visibleCount += 1;
+      });
+
+      searchResultNote.textContent = terms.length > 0
+        ? `검색 결과 ${visibleCount}곳`
+        : `추천 지역 ${visibleCount}곳`;
+      noResults.classList.toggle("active", visibleCount === 0);
+    }
+
+    searchInput.addEventListener("input", () => {
+      categoryButtons.forEach(button => button.classList.remove("selected"));
+      filterRegions(searchInput.value);
+    });
+
+    searchInput.addEventListener("keydown", event => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        filterRegions(searchInput.value);
+      }
+    });
+
+    categoryButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        const selected = button.classList.toggle("selected");
+        categoryButtons.forEach(other => {
+          if (other !== button) other.classList.remove("selected");
+        });
+        searchInput.value = selected ? button.dataset.filter : "";
+        filterRegions(searchInput.value);
+      });
+    });
+
+    function renderRegionDetail(regionName, profile = collectProfile()) {
+      const region = regions.find(item => item.name === regionName);
+      if (!region) return;
+      const matched = getMatchedLabels(region, profile);
+      detailImage.src = regionImages[region.name] || defaultSceneryImage;
+      detailImage.alt = `${region.name} 생활권 이미지`;
+      detailTitle.textContent = region.name;
+      detailDescription.textContent = region.description;
+      detailMood.textContent = matched.length > 0 ? matched.slice(0, 4).join(", ") : "생활권, 이동 동선, 체류 비용을 기준으로 확인";
+      detailCheck.textContent = region.checks[0];
+      detailChips.innerHTML = region.checks.map(item => `<span class="chip">${item}</span>`).join("");
+      renderDroneView(region.name);
+      detailTimeline.innerHTML = buildPersonalizedWeeks(region, profile).map(([title, text]) => `
+        <div class="week"><b>${title}</b><p>${text}</p></div>
+      `).join("");
+      regionDetail.classList.add("active");
+      if (document.querySelector('[data-screen="explore"]').classList.contains("active")) {
+        regionDetail.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }
+
+    function getActiveDroneMode() {
+      return document.querySelector("[data-drone-mode].active")?.dataset.droneMode || "drone";
+    }
+
+    function getActiveDroneTime() {
+      return document.querySelector("[data-drone-time].active")?.dataset.droneTime || "day";
+    }
+
+    function renderDroneView(regionName) {
+      const data = livingViews[regionName] || livingViews.default;
+      const mode = getActiveDroneMode();
+      const time = getActiveDroneTime();
+      const caption = data[mode][time];
+      naturePin.textContent = data.nature;
+      droneCanvas.classList.toggle("ground", mode === "ground");
+      droneCanvas.classList.toggle("evening", time === "evening");
+      droneCaptionTitle.textContent = caption[0];
+      droneCaptionText.textContent = caption[1];
+      livingList.innerHTML = data.rows.map(([title, text]) => `
+        <div class="living-row"><b>${title}</b><p>${text}</p></div>
+      `).join("");
+      regionDetail.dataset.currentRegion = regionName;
+    }
+
+    droneModeButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        droneModeButtons.forEach(item => item.classList.toggle("active", item === button));
+        renderDroneView(regionDetail.dataset.currentRegion || "부산 영도");
+      });
+    });
+
+    droneTimeButtons.forEach(button => {
+      button.addEventListener("click", () => {
+        droneTimeButtons.forEach(item => item.classList.toggle("active", item === button));
+        renderDroneView(regionDetail.dataset.currentRegion || "부산 영도");
+      });
+    });
+
+    document.querySelectorAll(".region-card").forEach(card => {
+      card.addEventListener("click", event => {
+        if (event.target.closest(".heart")) {
+          event.preventDefault();
+          toggleSaved(card.dataset.region);
+          return;
+        }
+        renderRegionDetail(card.dataset.region);
+      });
+    });
+
+    const lodgingsByRegion = {
+      "강릉 안목해변": [
+        { name: "안목 바다뷰 게스트하우스", type: "게스트하우스", price: "1박 4.5만 · 월 75만", walk: 0, tags: ["오션뷰", "공용주방"] },
+        { name: "커피거리 원룸 스테이", type: "원룸", price: "월 62만", walk: 4, tags: ["주방", "세탁기"] },
+        { name: "강릉역 레지던스", type: "레지던스", price: "월 95만", walk: 9, tags: ["역세권", "청소서비스"] }
+      ],
+      "부산 영도": [
+        { name: "흰여울 오션뷰 스테이", type: "독채", price: "1박 6만 · 월 90만", walk: 0, tags: ["바다뷰", "테라스"] },
+        { name: "봉래동 코리빙 하우스", type: "코리빙", price: "월 70만", walk: 5, tags: ["공용라운지", "단기가능"] },
+        { name: "영도 비즈니스 호텔", type: "호텔", price: "1박 7만", walk: 8, tags: ["조식", "주차"] }
+      ],
+      "서울 익선동": [
+        { name: "익선 한옥 게스트하우스", type: "한옥스테이", price: "1박 8만 · 월 130만", walk: 0, tags: ["한옥", "중심가"] },
+        { name: "종로 도심 레지던스", type: "레지던스", price: "월 150만", walk: 4, tags: ["역세권", "세탁"] }
+      ],
+      "전주 한옥마을 외곽": [
+        { name: "교동 한옥 스테이", type: "한옥스테이", price: "1박 6만 · 월 85만", walk: 0, tags: ["한옥", "조용함"] },
+        { name: "객사길 원룸텔", type: "원룸", price: "월 58만", walk: 5, tags: ["주방", "도심"] }
+      ],
+      "통영 봉평동": [
+        { name: "봉평동 바다 게스트하우스", type: "게스트하우스", price: "1박 4.5만 · 월 70만", walk: 0, tags: ["항구뷰", "공용주방"] },
+        { name: "통영항 비즈니스 호텔", type: "호텔", price: "1박 6.5만", walk: 7, tags: ["조식", "주차"] }
+      ],
+      "속초 청초호": [
+        { name: "청초호 워케이션 스테이", type: "스테이", price: "1박 5만 · 월 80만", walk: 0, tags: ["호수뷰", "작업데스크"] },
+        { name: "속초항 게스트하우스", type: "게스트하우스", price: "월 65만", walk: 6, tags: ["시장근처", "공용주방"] }
+      ],
+      "제주 구좌": [
+        { name: "구좌 돌담 독채", type: "독채", price: "1박 7만 · 월 100만", walk: 0, tags: ["프라이빗", "주방"] },
+        { name: "세화 책방 게스트하우스", type: "게스트하우스", price: "월 70만", walk: 8, tags: ["바다근처", "북카페"] }
+      ],
+      "목포 원도심": [
+        { name: "원도심 레트로 스테이", type: "스테이", price: "1박 4만 · 월 60만", walk: 0, tags: ["레트로", "도심"] },
+        { name: "목포역 비즈니스 호텔", type: "호텔", price: "1박 5.5만", walk: 6, tags: ["역세권", "조식"] }
+      ],
+      "춘천 소양강": [
+        { name: "소양강 호수뷰 스테이", type: "스테이", price: "1박 5만 · 월 78만", walk: 0, tags: ["호수뷰", "작업공간"] },
+        { name: "춘천역 원룸 레지던스", type: "레지던스", price: "월 72만", walk: 7, tags: ["역세권", "세탁"] }
+      ],
+      "군산 월명동": [
+        { name: "월명동 근대 골목 스테이", type: "스테이", price: "1박 4만 · 월 58만", walk: 0, tags: ["근대골목", "조용함"] },
+        { name: "군산 비즈니스 호텔", type: "호텔", price: "1박 5만", walk: 7, tags: ["주차", "조식"] }
+      ],
+      "여수 고소동": [
+        { name: "고소동 오션뷰 게스트하우스", type: "게스트하우스", price: "1박 5만 · 월 80만", walk: 0, tags: ["바다뷰", "벽화마을"] },
+        { name: "여수엑스포 비즈니스 호텔", type: "호텔", price: "1박 6.5만", walk: 9, tags: ["역세권", "조식"] }
+      ],
+      "순천 조례호수공원": [
+        { name: "조례호수 브런치 스테이", type: "스테이", price: "1박 4.5만 · 월 68만", walk: 0, tags: ["호수뷰", "주방"] },
+        { name: "순천만 게스트하우스", type: "게스트하우스", price: "월 62만", walk: 8, tags: ["자연근처", "공용주방"] }
+      ]
+    };
+
+    function buildGenericLodgings(name) {
+      const place = name.split(" ")[0];
+      return [
+        { name: `${place} 로컬 게스트하우스`, type: "게스트하우스", price: "1박 5만 · 월 75만", walk: 0, tags: ["공용주방", "단기가능"] },
+        { name: `${place} 비즈니스 호텔`, type: "호텔", price: "1박 6만", walk: 7, tags: ["조식", "주차"] }
+      ];
+    }
+
+    function renderJobs(regionName, lodging) {
+      const jobs = (jobsByRegion[regionName] || [])
+        .map(job => {
+          const base = parseInt(String(job.walk).replace(/[^0-9]/g, ""), 10) || 8;
+          const minutes = Math.max(1, base + (lodging ? lodging.walk : 0));
+          return { ...job, minutes };
+        })
+        .sort((a, b) => a.minutes - b.minutes);
+      const baseLabel = lodging ? `${lodging.name} 기준` : `${regionName} 숙소 주변`;
+      jobCount.textContent = `⌖ ${baseLabel} · ${jobs.length}개의 일자리`;
+      jobList.innerHTML = jobs.map(job => `
+        <article class="job-card">
+          <div class="job-img">
+            <img src="${job.image}" alt="${job.title}" />
+            <span class="walk">⌁ 도보 ${job.minutes}분</span>
+            <button class="heart" type="button" aria-label="저장">♡</button>
+          </div>
+          <div class="job-body">
+            <h2>${job.title}</h2>
+            <p class="place">⌖ ${job.place}</p>
+            <div class="job-meta">
+              <div><div class="meta-label">$ 급여</div><p>${job.pay}</p></div>
+              <div><div class="meta-label">◷ 근무시간</div><p>${job.time}</p></div>
+            </div>
+            <div class="chips">${job.tags.map(tag => `<span class="chip">${tag}</span>`).join("")}</div>
+            <div class="mood">
+              <p>업장 분위기</p>
+              <div class="chips">${job.mood.map(tag => `<span class="chip">${tag}</span>`).join("")}</div>
+            </div>
+            <div class="actions"><button class="primary" type="button">바로 연락하기</button><button class="secondary" type="button">저장</button></div>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function syncJobPinCounts() {
+      document.querySelectorAll("[data-job-region]").forEach(pin => {
+        const count = (jobsByRegion[pin.dataset.jobRegion] || []).length;
+        let small = pin.querySelector("small");
+        if (!small) {
+          small = document.createElement("small");
+          pin.append(small);
+        }
+        small.textContent = count;
+      });
+    }
+
+    function selectJobRegion(regionName, lodging) {
+      if (![...jobRegion.options].some(option => option.value === regionName || option.textContent === regionName)) {
+        const option = document.createElement("option");
+        option.textContent = regionName;
+        jobRegion.append(option);
+      }
+      jobRegion.value = regionName;
+      document.querySelectorAll("[data-job-region]").forEach(pin => {
+        pin.classList.toggle("active", pin.dataset.jobRegion === regionName);
+      });
+      syncJobPinCounts();
+      renderJobs(regionName, lodging || null);
+    }
+
+    jobRegion.addEventListener("change", () => {
+      selectJobRegion(jobRegion.value);
+    });
+
+    jobMap.addEventListener("click", event => {
+      const pin = event.target.closest("[data-job-region]");
+      if (!pin) return;
+      selectJobRegion(pin.dataset.jobRegion);
+    });
+
+    // 숙소 탭
+    function stayRegionList() {
+      const known = Object.keys(lodgingsByRegion);
+      regions.forEach(region => {
+        if (!known.includes(region.name)) known.push(region.name);
+      });
+      return known;
+    }
+
+    function populateStayRegions() {
+      stayRegion.innerHTML = stayRegionList()
+        .map(name => `<option>${name}</option>`)
+        .join("");
+    }
+
+    function renderStays(regionName) {
+      const list = lodgingsByRegion[regionName] || buildGenericLodgings(regionName);
+      const image = regionImages[regionName] || defaultSceneryImage;
+      stayList.innerHTML = list.map((lodge, index) => `
+        <article class="stay-card">
+          <div class="stay-img">
+            <img src="${image}" alt="${lodge.name}" />
+            <span class="stay-type">${lodge.type}</span>
+          </div>
+          <div class="stay-body">
+            <h3>${lodge.name}</h3>
+            <p class="stay-price">${lodge.price}</p>
+            <div class="chips">${lodge.tags.map(tag => `<span class="chip">${tag}</span>`).join("")}</div>
+            <p class="stay-walk">⌁ 생활권 중심까지 ${lodge.walk === 0 ? "바로 앞" : "도보 " + lodge.walk + "분"}</p>
+            <button class="primary stay-jobs-btn" type="button" data-stay-name="${lodge.name}">예약 문의하기</button>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function selectStayRegion(region) {
+      if (![...stayRegion.options].some(option => option.value === region || option.textContent === region)) {
+        const option = document.createElement("option");
+        option.textContent = region;
+        stayRegion.append(option);
+      }
+      stayRegion.value = region;
+      document.querySelectorAll("[data-stay-pin]").forEach(pin => {
+        pin.classList.toggle("active", pin.dataset.stayPin === region);
+      });
+      renderStays(region);
+    }
+
+    stayRegion.addEventListener("change", () => selectStayRegion(stayRegion.value));
+
+    stayMap.addEventListener("click", event => {
+      const pin = event.target.closest("[data-stay-pin]");
+      if (!pin) return;
+      selectStayRegion(pin.dataset.stayPin);
+    });
+
+    stayList.addEventListener("click", event => {
+      const button = event.target.closest("[data-stay-name]");
+      if (!button) return;
+      showToast(`${button.dataset.stayName} · 예약 문의가 접수되었어요. 곧 안내드릴게요.`);
+    });
+
+    function showStory(index) {
+      currentStory = (index + stories.length) % stories.length;
+      stories.forEach((story, i) => story.classList.toggle("active", i === currentStory));
+      rail.forEach((dot, i) => dot.classList.toggle("active", i === currentStory));
+      syncFeedActions();
+    }
+
+    // 릴스형 피드: 위로 스와이프 = 다음, 아래로 스와이프 = 이전
+    const feedEl = document.querySelector(".feed");
+    let swipeStartY = null;
+
+    feedEl.addEventListener("pointerdown", event => {
+      swipeStartY = event.target.closest("button") ? null : event.clientY;
+    });
+
+    feedEl.addEventListener("pointerup", event => {
+      if (swipeStartY === null) return;
+      const dy = event.clientY - swipeStartY;
+      swipeStartY = null;
+      // 탭(작은 움직임) = 다음, 위로 스와이프 = 다음, 아래로 스와이프 = 이전
+      if (Math.abs(dy) < 45) {
+        showStory(currentStory + 1);
+        return;
+      }
+      showStory(currentStory + (dy < 0 ? 1 : -1));
+    });
+
+    feedEl.addEventListener("pointercancel", () => { swipeStartY = null; });
+
+    let wheelLock = false;
+    feedEl.addEventListener("wheel", event => {
+      event.preventDefault();
+      if (wheelLock || Math.abs(event.deltaY) < 8) return;
+      wheelLock = true;
+      setTimeout(() => { wheelLock = false; }, 450);
+      showStory(currentStory + (event.deltaY > 0 ? 1 : -1));
+    }, { passive: false });
+
+    const feedLikeBase = {
+      "부산 영도": 3421, "강릉 안목해변": 2980, "서울 익선동": 2145,
+      "통영 봉평동": 1760, "속초 청초호": 1985, "제주 구좌": 2670,
+      "목포 원도심": 1320, "춘천 소양강": 1540
+    };
+
+    let likedRegions = [];
+    try {
+      likedRegions = JSON.parse(localStorage.getItem("likedRegions") || "[]");
+    } catch (error) {
+      likedRegions = [];
+    }
+
+    function currentFeedRegion() {
+      return stories[currentStory]?.dataset.region || "";
+    }
+
+    function syncFeedActions() {
+      const region = currentFeedRegion();
+      const liked = likedRegions.includes(region);
+      const base = feedLikeBase[region] || 1200;
+      feedLike.classList.toggle("on", liked);
+      feedLike.querySelector(".icon").textContent = liked ? "♥" : "♡";
+      feedLikeCount.textContent = (base + (liked ? 1 : 0)).toLocaleString();
+    }
+
+    feedLike.addEventListener("click", () => {
+      const region = currentFeedRegion();
+      if (!region) return;
+      likedRegions = likedRegions.includes(region)
+        ? likedRegions.filter(item => item !== region)
+        : [...likedRegions, region];
+      localStorage.setItem("likedRegions", JSON.stringify(likedRegions));
+      syncFeedActions();
+    });
+
+    let toastTimer = null;
+    function showToast(message) {
+      const toast = document.getElementById("toast");
+      if (!toast) return;
+      toast.textContent = message;
+      toast.hidden = false;
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => { toast.hidden = true; }, 2200);
+    }
+
+    function shareLink(region) {
+      const url = `${location.origin}${location.pathname}?region=${encodeURIComponent(region)}`;
+      const shareData = { title: "일단 살아봄", text: `${region} — 일단 살아봄에서 둘러보기`, url };
+      if (navigator.share) {
+        navigator.share(shareData).catch(() => {});
+        return;
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url)
+          .then(() => showToast("링크를 복사했어요 · 붙여넣기로 공유하세요"))
+          .catch(() => showToast(url));
+        return;
+      }
+      showToast(url);
+    }
+
+    feedShare.addEventListener("click", () => {
+      const region = currentFeedRegion();
+      if (!region) return;
+      shareLink(region);
+    });
+
+    const aboutModal = document.getElementById("aboutModal");
+    const brandPill = document.getElementById("brandPill");
+    function openAbout() { aboutModal.hidden = false; }
+    function closeAbout() { aboutModal.hidden = true; }
+    if (brandPill) brandPill.addEventListener("click", openAbout);
+    if (aboutModal) {
+      aboutModal.addEventListener("click", event => {
+        if (event.target.closest("[data-close]")) {
+          closeAbout();
+          return;
+        }
+        const tabTarget = event.target.closest("[data-close-tab]");
+        if (tabTarget) {
+          closeAbout();
+          openTab(tabTarget.dataset.closeTab);
+        }
+      });
+    }
+    document.addEventListener("keydown", event => {
+      if (event.key === "Escape" && aboutModal && !aboutModal.hidden) closeAbout();
+    });
+
+    function getSelected(group) {
+      return [...document.querySelectorAll(`[data-choice-group="${group}"] .choice.selected`)]
+        .map(button => button.dataset.value);
+    }
+
+    function setSelected(group, values) {
+      const container = document.querySelector(`[data-choice-group="${group}"]`);
+      if (!container) return;
+      // 커스텀(직접 추가) 칩은 제거 후 필요한 것만 다시 생성
+      container.querySelectorAll('.choice[data-custom="true"]').forEach(chip => chip.remove());
+      container.querySelectorAll(".choice").forEach(button => {
+        button.classList.toggle("selected", values.includes(button.dataset.value));
+      });
+      const known = [...container.querySelectorAll(".choice")].map(c => c.dataset.value);
+      values.filter(value => !known.includes(value)).forEach(value => addCustomChip(group, value, true));
+    }
+
+    function addCustomChip(group, value, selected = true) {
+      value = (value || "").trim();
+      if (!value) return;
+      const container = document.querySelector(`[data-choice-group="${group}"]`);
+      if (!container) return;
+      const existing = [...container.querySelectorAll(".choice")].find(c => c.dataset.value === value);
+      if (existing) {
+        existing.classList.toggle("selected", selected);
+        return;
+      }
+      const chip = document.createElement("button");
+      chip.type = "button";
+      chip.className = "choice" + (selected ? " selected" : "");
+      chip.dataset.value = value;
+      chip.dataset.custom = "true";
+      chip.innerHTML = `${value}<span class="chip-x" aria-label="삭제">×</span>`;
+      const addChip = container.querySelector(".add-chip");
+      container.insertBefore(chip, addChip || null);
+    }
+
+    function collectProfile() {
+      return {
+        userName: document.getElementById("userName").value.trim() || "사용자",
+        job: document.getElementById("job").value.trim() || "관심 직무",
+        budget: document.getElementById("budget").value,
+        duration: document.getElementById("duration").value,
+        workType: document.getElementById("workType").value,
+        mood: getSelected("mood"),
+        priority: getSelected("priority")
+      };
+    }
+
+    const labelMap = {
+      sea: "바다",
+      quiet: "조용한 분위기",
+      alley: "골목 산책",
+      night: "야경",
+      cafe: "카페",
+      art: "예술/문화",
+      workspace: "작업 공간",
+      walk: "산책 동선",
+      cost: "생활비",
+      nightSafe: "저녁 이동",
+      project: "로컬 프로젝트",
+      nature: "자연/숲",
+      lake: "호수/강",
+      mountain: "산/등산",
+      tradition: "전통/한옥",
+      market: "전통시장",
+      food: "맛집/먹거리",
+      festival: "축제/공연",
+      transit: "대중교통",
+      internet: "빠른 인터넷",
+      medical: "의료 접근",
+      pet: "반려동물",
+      fitness: "운동 시설",
+      community: "커뮤니티"
+    };
+
+    function getMatchedLabels(region, profile) {
+      const selected = [...profile.mood, ...profile.priority];
+      return selected
+        .filter(value => region.tags.includes(value) || (value === "nightSafe" && region.tags.includes("quiet")))
+        .map(value => labelMap[value])
+        .filter(Boolean);
+    }
+
+    function scoreRegion(region, profile) {
+      const selected = [...profile.mood, ...profile.priority];
+      let score = region.base;
+      selected.forEach(value => {
+        if (region.tags.includes(value)) score += 6;
+      });
+      if (profile.workType === "remote" && region.tags.includes("workspace")) score += 8;
+      if (profile.workType === "break" && region.tags.includes("quiet")) score += 7;
+      if (profile.budget === "low" && region.tags.includes("cost")) score += 10;
+      if (profile.budget === "low" && region.name === "서울 익선동") score -= 8;
+      if (profile.budget === "high" && region.name === "서울 익선동") score += 7;
+      if (profile.priority.includes("nightSafe") && region.tags.includes("quiet")) score += 5;
+      if (profile.priority.includes("nightSafe") && region.name === "서울 익선동") score -= 6;
+      if (profile.priority.includes("project") && region.tags.includes("project")) score += 10;
+      if (profile.mood.includes("sea") && region.name === "부산 영도" && !profile.priority.includes("project") && !profile.mood.includes("art")) score -= 7;
+      if (profile.mood.includes("sea") && profile.mood.includes("cafe") && profile.priority.includes("workspace")) {
+        if (["강릉 안목해변", "속초 청초호"].includes(region.name)) score += 8;
+      }
+      if (profile.mood.includes("art") || profile.priority.includes("project")) {
+        if (["부산 영도", "통영 봉평동", "전주 한옥마을 외곽", "군산 월명동"].includes(region.name)) score += 7;
+      }
+      if (profile.priority.includes("cost")) {
+        if (["군산 월명동", "순천 조례호수공원", "목포 원도심", "전주 한옥마을 외곽"].includes(region.name)) score += 9;
+      }
+      if (profile.mood.includes("night")) {
+        if (["여수 고소동", "목포 원도심", "서울 익선동"].includes(region.name)) score += 8;
+      }
+      if (profile.mood.includes("quiet") && profile.priority.includes("walk")) {
+        if (["순천 조례호수공원", "제주 구좌", "춘천 소양강"].includes(region.name)) score += 6;
+      }
+      return Math.max(72, score);
+    }
+
+    function pickByProfile(profile, options) {
+      const selected = [...profile.mood, ...profile.priority];
+      for (const value of selected) {
+        if (options[value]) return options[value];
+      }
+      return options.default;
+    }
+
+    function buildPersonalizedWeeks(region, profile) {
+      const selected = [...profile.mood, ...profile.priority];
+      const placeTone = region.name.split(" ")[0];
+      const workPlan = {
+        remote: `${placeTone}에서 오전 집중 업무와 오후 생활권 탐색을 나누는 재택근무 루틴을 만듭니다.`,
+        hybrid: `외부 미팅이 있는 날과 없는 날을 나눠 교통 동선과 작업 공간을 먼저 확인합니다.`,
+        break: `업무 부담을 줄이고 산책, 휴식, 동네 탐색 중심의 회복 루틴을 잡습니다.`
+      }[profile.workType];
+      const moodPlan = pickByProfile(profile, {
+        sea: `바다와 가까운 산책 루트, 해질녘 이동 동선, 조용히 머물 카페를 저장합니다.`,
+        quiet: `소음이 적은 카페, 혼자 식사하기 편한 곳, 저녁에 부담 없는 귀가 동선을 확인합니다.`,
+        alley: `골목 상점, 작은 전시, 로컬 식당을 묶어 하루 탐색 코스를 만듭니다.`,
+        night: `야경이 좋은 거리와 늦은 시간 이동 가능 구간을 낮에 먼저 답사합니다.`,
+        cafe: `작업 가능한 카페를 시간대별로 나누고 콘센트, 와이파이, 혼잡도를 기록합니다.`,
+        art: `전시, 공방, 문화공간을 방문하며 관심 있는 운영자나 프로젝트를 저장합니다.`,
+        default: `생활시설, 산책로, 카페, 마트 동선을 실제 도보 기준으로 확인합니다.`
+      });
+      const connectionPlan = profile.priority.includes("project")
+        ? `${profile.job} 역량을 활용할 수 있는 로컬 프로젝트를 찾고, 상점/공간 운영자에게 짧은 제안을 남깁니다.`
+        : profile.priority.includes("cost")
+          ? `식비, 교통비, 카페 이용 비용을 기록해 예산 안에서 지속 가능한 체류 방식을 조정합니다.`
+          : profile.priority.includes("nightSafe")
+            ? `저녁 이동 경로와 조명, 편의점, 정류장 위치를 확인해 안전한 생활 반경을 정합니다.`
+            : `체류자 모임이나 소규모 클래스에 참여해 지역과 느슨한 연결을 만듭니다.`;
+      const finalPlan = selected.includes("sea") || selected.includes("quiet")
+        ? `재방문하기 좋은 계절과 더 오래 머물 숙소 조건을 정리합니다.`
+        : selected.includes("art") || selected.includes("project")
+          ? `참여한 활동을 포트폴리오 기록으로 정리하고 프로젝트 연장 여부를 검토합니다.`
+          : `생활 만족도, 비용, 이동 피로도를 기준으로 다음 체류 지역과 비교합니다.`;
+
+      return [
+        ["1주 차 · 생활 적응", workPlan],
+        ["2주 차 · 취향 탐색", moodPlan],
+        ["3주 차 · 조건 검증", connectionPlan],
+        ["4주 차 · 다음 선택", finalPlan]
+      ];
+    }
+
+    const localLinkTemplates = {
+      design: [
+        ["로컬 카페 이용경험 개선", "메뉴판, 주문 흐름, 공간 이용 동선을 체류자 관점에서 관찰하고 UX 피드백을 정리합니다.", ["UX", "관찰 기록", "포트폴리오"]],
+        ["게스트하우스 예약 과정 점검", "예약·안내 과정을 직접 경험하며 불편 요소와 개선안을 운영자에게 제안합니다.", ["서비스 점검", "제안서", "협업"]],
+        ["지역 행사 카드뉴스 디자인", "로컬 행사 안내용 SNS 카드뉴스나 포스터 시안을 제작해 봅니다.", ["비주얼", "콘텐츠", "단기"]]
+      ],
+      dev: [
+        ["로컬 상점 예약 페이지 개선", "간단한 예약/안내 웹페이지의 동작 오류와 사용성을 점검하고 개선안을 제안합니다.", ["웹", "QA", "협업"]],
+        ["지역 행사 신청 폼 제작", "노코드 또는 간단한 스크립트로 행사 신청 폼과 자동 안내를 구성합니다.", ["자동화", "폼", "단기"]],
+        ["생활권 데이터 정리", "카페·시설 위치, 운영시간 데이터를 모아 지역 안내 자료로 구조화합니다.", ["데이터", "정리", "기록"]]
+      ],
+      content: [
+        ["로컬 브랜드 SNS 콘텐츠 기획", "상점의 분위기와 이야기를 담은 SNS 콘텐츠 또는 상세페이지 문구를 제안합니다.", ["콘텐츠", "SNS", "기획"]],
+        ["체류자 하루 기록 연재", "지역에서 보내는 하루를 짧은 글과 사진으로 기록해 Mood Feed에 연재합니다.", ["기록", "사진", "연재"]],
+        ["지역 행사 홍보 지원", "행사 안내 문구와 홍보 채널을 정리해 운영자의 홍보를 돕습니다.", ["홍보", "협업", "단기"]]
+      ],
+      generic: [
+        ["로컬 공간 경험 피드백", "카페, 숙소, 상점을 체류자 관점에서 이용하고 개선 아이디어를 기록합니다.", ["관찰", "피드백", "단기"]],
+        ["지역 행사 운영 참여", "소규모 로컬 행사나 마켓 운영을 도우며 지역 사람들과 연결됩니다.", ["참여", "행사", "협업"]],
+        ["관광 동선 사용성 조사", "실제 이동 경험을 바탕으로 불편 요소를 기록하고 개선 제안을 남깁니다.", ["조사", "기록", "제안"]]
+      ]
+    };
+
+    function getLocalLinkSet(job) {
+      const text = (job || "").toLowerCase();
+      if (/(ux|ui|디자|design)/.test(text)) return localLinkTemplates.design;
+      if (/(개발|엔지니|프로그|developer|engineer|dev)/.test(text)) return localLinkTemplates.dev;
+      if (/(마케팅|콘텐츠|컨텐츠|sns|홍보|에디터|기자|작가|content)/.test(text)) return localLinkTemplates.content;
+      return localLinkTemplates.generic;
+    }
+
+    function renderLocalLinks(region, profile) {
+      if (!localLinkList) return;
+      const placeTone = region.name.split(" ")[0];
+      const projects = getLocalLinkSet(profile.job);
+      localLinkList.innerHTML = projects.map(([title, desc, tags]) => `
+        <div class="local-link">
+          <b>${placeTone} · ${title}</b>
+          <p>${desc}</p>
+          <div class="chips">${tags.map(tag => `<span class="chip">${tag}</span>`).join("")}</div>
+        </div>
+      `).join("");
+    }
+
+    function renderRecommendation(profile, syncExplore = false) {
+      const rawName = document.getElementById("userName").value.trim();
+      profileGreeting.textContent = rawName ? `${rawName}님을 위한 일단 살아봄` : "나를 위한 일단 살아봄";
+      const ranked = regions
+        .map(region => ({
+          ...region,
+          score: scoreRegion(region, profile),
+          matched: getMatchedLabels(region, profile)
+        }))
+        .sort((a, b) => b.score - a.score);
+      const best = ranked[0];
+      const jobText = profile.job ? `${profile.job} 관점의 로컬 활동` : "직무 기반 로컬 활동";
+      const durationText = profile.duration === "한 달" ? "30일" : profile.duration;
+
+      matchTitle.textContent = best.name;
+      matchImage.src = regionImages[best.name] || defaultSceneryImage;
+      matchScore.textContent = `${Math.min(98, best.score)}%`;
+      const matchedText = best.matched.length > 0 ? ` 선택한 조건 중 ${best.matched.slice(0, 4).join(", ")}와 특히 잘 맞습니다.` : "";
+      matchDescription.textContent = `${best.description}${matchedText} ${profile.userName}님에게는 ${durationText} 체류와 ${jobText}을 함께 설계하는 방식이 적합합니다.`;
+      checkList.innerHTML = best.checks.map(item => `<li>${item} 확인</li>`).join("");
+      candidateList.innerHTML = ranked.slice(0, 3).map((region, index) => {
+        const reason = region.matched.length > 0
+          ? `${region.matched.slice(0, 3).join(", ")} 조건과 매칭`
+          : "입력한 체류 조건과 기본 생활권이 안정적으로 매칭";
+        return `
+          <div class="candidate">
+            <span class="candidate-rank">${index + 1}</span>
+            <span class="candidate-info"><b>${region.name}</b><p>${reason}</p></span>
+            <span class="score-badge">${Math.min(98, region.score)}%</span>
+          </div>
+        `;
+      }).join("");
+      const personalizedWeeks = buildPersonalizedWeeks(best, profile);
+      timeline.innerHTML = personalizedWeeks.map(([title, text]) => `
+        <div class="week"><b>${title}</b><p>${text}</p></div>
+      `).join("");
+      renderLocalLinks(best, profile);
+      if (syncExplore) {
+        searchInput.value = best.name;
+        filterRegions(best.name);
+        renderRegionDetail(best.name, profile);
+        if (jobsByRegion[best.name]) {
+          selectJobRegion(best.name);
+        }
+      }
+      return best;
+    }
+
+    function buildAiPayload(profile, rankedRegions) {
+      return {
+        user: profile,
+        selectedLabels: {
+          mood: profile.mood.map(value => labelMap[value] || value),
+          priority: profile.priority.map(value => labelMap[value] || value)
+        },
+        localRanking: rankedRegions.map(region => ({
+          name: region.name,
+          score: region.score,
+          matched: region.matched,
+          checks: region.checks,
+          description: region.description
+        })),
+        availableRegions: regions.map(region => ({
+          name: region.name,
+          tags: region.tags.map(value => labelMap[value] || value),
+          checks: region.checks,
+          description: region.description
+        }))
+      };
+    }
+
+    function inferTagsFromText(text, profile) {
+      const joined = `${text} ${profile.mood.join(" ")} ${profile.priority.join(" ")}`;
+      const tags = new Set(["walk"]);
+      if (/바다|해변|항구|섬|오션/.test(joined)) tags.add("sea");
+      if (/조용|한적|휴식|고요/.test(joined)) tags.add("quiet");
+      if (/골목|구도심|원도심|한옥/.test(joined)) tags.add("alley");
+      if (/야경|저녁|밤/.test(joined)) tags.add("night");
+      if (/카페|커피|작업/.test(joined)) tags.add("cafe").add("workspace");
+      if (/예술|문화|전시|공방|디자인/.test(joined)) tags.add("art").add("project");
+      if (/생활비|저렴|비용|예산/.test(joined)) tags.add("cost");
+      profile.mood.forEach(value => tags.add(value));
+      profile.priority.forEach(value => {
+        if (value !== "nightSafe") tags.add(value);
+      });
+      return [...tags];
+    }
+
+    function ensureRegionFromAi(result, profile) {
+      const name = result.region || result.name || "새 추천 지역";
+      let region = regions.find(item => item.name === name);
+      if (region) return region;
+
+      const checks = Array.isArray(result.checks) && result.checks.length > 0
+        ? result.checks.slice(0, 3)
+        : ["숙소 주변 작업 공간", "저녁 이동 동선", "한 달 예산 안의 생활비"];
+      const description = result.description || `${name}은 입력한 취향과 체류 조건을 기준으로 새롭게 추천된 지역입니다.`;
+      const weeks = Array.isArray(result.weeks) && result.weeks.length === 4
+        ? result.weeks.map(week => [week.title, week.text])
+        : buildPersonalizedWeeks({ name, tags: inferTagsFromText(description, profile) }, profile);
+
+      region = {
+        name,
+        base: Math.max(68, Math.min(84, Number(result.score) || 76)),
+        tags: inferTagsFromText(`${description} ${checks.join(" ")}`, profile),
+        description,
+        checks,
+        weeks
+      };
+      regions.push(region);
+      regionImages[name] = result.image || defaultSceneryImage;
+      livingViews[name] = buildGenericLivingView(name, region);
+      jobsByRegion[name] = buildGenericJobs(name);
+      addExploreRegionCard(region);
+      addJobRegionOption(name);
+      return region;
+    }
+
+    function buildGenericLivingView(name, region) {
+      const hasSea = region.tags.includes("sea");
+      const nature = hasSea ? "바다길" : region.tags.includes("alley") ? "골목" : "산책로";
+      return {
+        nature,
+        rows: [
+          ["숙소 구조", `${name} 숙소를 기준으로 작업 공간, 편의시설, 산책 공간이 같은 생활권에 있는지 확인합니다.`],
+          ["주요 동선", "숙소에서 카페, 마트, 산책로까지 실제 도보 이동 흐름을 점검합니다."],
+          ["자연 접근", hasSea ? "바다와 산책로 접근성을 중심으로 아침/저녁 루틴을 확인합니다." : "공원, 골목, 호수 등 쉬는 공간까지의 거리감을 확인합니다."],
+          ["업무 공간", "작업 가능한 카페와 조용한 실내 공간을 시간대별로 나눠 확인합니다."]
+        ],
+        drone: livingViews.default.drone,
+        ground: livingViews.default.ground
+      };
+    }
+
+    function buildGenericJobs(name) {
+      return [
+        { title: "로컬 카페 운영 보조", place: `${name} · 작업 가능한 카페`, pay: "시급 12,000원", time: "협의 가능", walk: "도보 8분", image: "https://images.unsplash.com/photo-1501339847302-ac426a4a7cbb?auto=format&fit=crop&w=1000&q=80", tags: ["카페", "단기", "유연 근무"], mood: ["차분함", "로컬", "친근함"] },
+        { title: "숙소 체크인 보조", place: `${name} · 로컬 스테이`, pay: "시급 12,500원", time: "평일 17:00-21:00", walk: "도보 10분", image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?auto=format&fit=crop&w=1000&q=80", tags: ["숙소", "응대", "저녁"], mood: ["자유로움", "조용함", "깔끔함"] }
+      ];
+    }
+
+    function addExploreRegionCard(region) {
+      if (document.querySelector(`[data-region="${region.name}"]`)) return;
+      const list = document.getElementById("regionList");
+      const card = document.createElement("button");
+      card.className = "region-card";
+      card.type = "button";
+      card.dataset.region = region.name;
+      card.dataset.search = `${region.name} ${region.tags.map(value => labelMap[value] || value).join(" ")}`;
+      card.innerHTML = `
+        <img src="${regionImages[region.name] || defaultSceneryImage}" alt="${region.name}" />
+        <span><h3>${region.name.split(" ")[0]}</h3><p>⌖ AI 새 추천 × 생활권</p></span>
+        <span class="heart">♡</span>
+      `;
+      card.addEventListener("click", event => {
+        if (event.target.closest(".heart")) {
+          event.preventDefault();
+          toggleSaved(region.name);
+          return;
+        }
+        renderRegionDetail(region.name);
+      });
+      list.prepend(card);
+      syncSaved();
+    }
+
+    function addJobRegionOption(name) {
+      if ([...jobRegion.options].some(option => option.value === name)) return;
+      const option = document.createElement("option");
+      option.textContent = name;
+      jobRegion.append(option);
+      const coord = cityCoords[name];
+      addMapPin(name, name.split(" ")[0], coord ? coord[0] : undefined, coord ? coord[1] : undefined);
+      syncJobPinCounts();
+    }
+
+    function applyAiRecommendation(result, profile) {
+      const region = ensureRegionFromAi(result, profile);
+      const score = Number(result.score) || scoreRegion(region, profile);
+      const weeks = Array.isArray(result.weeks) && result.weeks.length === 4
+        ? result.weeks.map(week => [week.title, week.text])
+        : buildPersonalizedWeeks(region, profile);
+      const candidates = Array.isArray(result.candidates) && result.candidates.length > 0
+        ? result.candidates.slice(0, 3)
+        : [{ name: region.name, score, reason: "AI 추천 결과" }];
+
+      matchTitle.textContent = region.name;
+      matchImage.src = regionImages[region.name] || defaultSceneryImage;
+      matchScore.textContent = `${Math.max(72, Math.min(98, score))}%`;
+      matchDescription.textContent = result.description || region.description;
+      checkList.innerHTML = (result.checks || region.checks).slice(0, 3).map(item => `<li>${item} 확인</li>`).join("");
+      candidateList.innerHTML = candidates.map((candidate, index) => `
+        <div class="candidate">
+          <span class="candidate-rank">${index + 1}</span>
+          <span class="candidate-info"><b>${candidate.name}</b><p>${candidate.reason || "사용자 조건과 매칭"}</p></span>
+          <span class="score-badge">${Math.min(98, Number(candidate.score) || score)}%</span>
+        </div>
+      `).join("");
+      timeline.innerHTML = weeks.map(([title, text]) => `
+        <div class="week"><b>${title}</b><p>${text}</p></div>
+      `).join("");
+      renderLocalLinks(region, profile);
+
+      searchInput.value = region.name;
+      filterRegions(region.name);
+      renderRegionDetail(region.name, profile);
+      if (jobsByRegion[region.name]) {
+        selectJobRegion(region.name);
+      }
+    }
+
+    // state: "empty" | "loading" | "results"
+    function showProfileState(state) {
+      const empty = document.getElementById("recommendEmpty");
+      const loading = document.getElementById("recommendLoading");
+      if (empty) empty.hidden = state !== "empty";
+      if (loading) loading.hidden = state !== "loading";
+      document.querySelectorAll(".result-block").forEach(block => {
+        block.hidden = state !== "results";
+      });
+    }
+
+    async function requestAiRecommendation(profile, rankedRegions) {
+      try {
+        const response = await fetch("/api/recommend", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(buildAiPayload(profile, rankedRegions))
+        });
+        const data = await response.json();
+        if (!response.ok || !data.ok) {
+          throw new Error(data.error || "AI 추천 실패");
+        }
+        applyAiRecommendation(data.result, profile);
+        aiStatus.textContent = "AI 추천 결과가 반영되었습니다.";
+        return true;
+      } catch (error) {
+        const message = error.message || "";
+        if (/OPENAI_API_KEY/i.test(message)) {
+          aiStatus.textContent = "OpenAI API 키가 설정되지 않아 로컬 추천 엔진으로 결과를 보여주고 있어요. (.env에 키를 넣고 서버를 재시작하면 AI 추천이 켜집니다.)";
+        } else {
+          aiStatus.textContent = `AI 연결에 실패해 로컬 추천 결과를 유지합니다. (${message})`;
+        }
+        return false;
+      }
+    }
+
+    function saveProfile(profile) {
+      localStorage.setItem("userProfile", JSON.stringify(profile));
+    }
+
+    function loadSavedProfile() {
+      try {
+        return JSON.parse(localStorage.getItem("userProfile") || "null");
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function applyProfileToForm(profile) {
+      const name = profile.userName && profile.userName !== "사용자" ? profile.userName : "";
+      const job = profile.job && profile.job !== "관심 직무" ? profile.job : "";
+      document.getElementById("userName").value = name;
+      document.getElementById("job").value = job;
+      if (profile.budget) document.getElementById("budget").value = profile.budget;
+      if (profile.duration) document.getElementById("duration").value = profile.duration;
+      if (profile.workType) document.getElementById("workType").value = profile.workType;
+      setSelected("mood", profile.mood || []);
+      setSelected("priority", profile.priority || []);
+    }
+
+    document.querySelectorAll("[data-choice-group]").forEach(group => {
+      group.addEventListener("click", event => {
+        const remove = event.target.closest(".chip-x");
+        if (remove) {
+          remove.closest(".choice").remove();
+          return;
+        }
+        const chip = event.target.closest(".choice");
+        if (chip) chip.classList.toggle("selected");
+      });
+    });
+
+    document.querySelectorAll(".add-chip").forEach(addChip => {
+      const group = addChip.dataset.addGroup;
+      const input = document.querySelector(`.add-input[data-add-group="${group}"]`);
+      const open = () => {
+        addChip.hidden = true;
+        input.hidden = false;
+        input.focus();
+      };
+      const close = () => {
+        input.hidden = true;
+        input.value = "";
+        addChip.hidden = false;
+      };
+      addChip.addEventListener("click", open);
+      input.addEventListener("keydown", event => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          if (input.value.trim()) {
+            addCustomChip(group, input.value, true);
+            input.value = "";
+          } else {
+            close();
+          }
+        } else if (event.key === "Escape") {
+          close();
+        }
+      });
+      input.addEventListener("blur", close);
+    });
+
+    form.addEventListener("submit", async event => {
+      event.preventDefault();
+      const profile = collectProfile();
+      saveProfile(profile);
+      localStorage.setItem("profileCompleted", "true");
+      const rankedRegions = regions
+        .map(region => ({
+          ...region,
+          score: scoreRegion(region, profile),
+          matched: getMatchedLabels(region, profile)
+        }))
+        .sort((a, b) => b.score - a.score);
+      showProfileState("loading");
+      const ok = await requestAiRecommendation(profile, rankedRegions);
+      if (!ok) {
+        // AI 실패 시 로컬 추천 결과로 채움
+        renderRecommendation(profile, true);
+      }
+      showProfileState("results");
+    });
+
+    resetProfile.addEventListener("click", () => {
+      localStorage.removeItem("userProfile");
+      localStorage.removeItem("profileCompleted");
+      document.getElementById("userName").value = defaults.userName;
+      document.getElementById("job").value = defaults.job;
+      document.getElementById("budget").value = defaults.budget;
+      document.getElementById("duration").value = defaults.duration;
+      document.getElementById("workType").value = defaults.workType;
+      setSelected("mood", defaults.mood);
+      setSelected("priority", defaults.priority);
+      renderRecommendation(collectProfile());
+      showProfileState("empty");
+    });
+
+    let savedRegions = [];
+    try {
+      savedRegions = JSON.parse(localStorage.getItem("savedRegions") || "[]");
+    } catch (error) {
+      savedRegions = [];
+    }
+
+    function isSaved(name) {
+      return savedRegions.includes(name);
+    }
+
+    function toggleSaved(name) {
+      if (isSaved(name)) {
+        savedRegions = savedRegions.filter(item => item !== name);
+      } else {
+        savedRegions = [...savedRegions, name];
+      }
+      localStorage.setItem("savedRegions", JSON.stringify(savedRegions));
+      syncSaved();
+    }
+
+    function syncSaved() {
+      document.querySelectorAll(".region-card[data-region]").forEach(card => {
+        const heart = card.querySelector(".heart");
+        if (!heart) return;
+        const saved = isSaved(card.dataset.region);
+        heart.classList.toggle("saved", saved);
+        heart.textContent = saved ? "♥" : "♡";
+      });
+    }
+
+    function syncImages() {
+      document.querySelectorAll(".story[data-region], .region-card[data-region]").forEach(el => {
+        const src = regionImages[el.dataset.region] || defaultSceneryImage;
+        const image = el.matches("img") ? el : el.querySelector("img");
+        if (image) image.src = src;
+      });
+    }
+
+    document.querySelectorAll(".cta").forEach(button => {
+      button.addEventListener("click", () => {
+        const region = button.closest(".story")?.dataset.region;
+        openTab("explore");
+        if (region) renderRegionDetail(region);
+      });
+    });
+
+    const savedProfile = loadSavedProfile();
+    if (savedProfile) applyProfileToForm(savedProfile);
+    renderRecommendation(collectProfile());
+    showProfileState("empty");
+    filterRegions("");
+    syncImages();
+    syncSaved();
+    syncFeedActions();
+    renderKoreaMap();
+    syncJobPinCounts();
+    selectJobRegion(jobRegion.value);
+    populateStayRegions();
+    renderStayMap();
+    selectStayRegion(stayRegion.value);
+
+    const initialTab = new URLSearchParams(window.location.search).get("tab");
+    openTab(["home", "explore", "stay", "jobs", "profile"].includes(initialTab) ? initialTab : "home");
+    const initialRegion = new URLSearchParams(window.location.search).get("region");
+    if (initialRegion) {
+      openTab("explore");
+      renderRegionDetail(initialRegion);
+    }
+
+    setInterval(() => {
+      if (document.querySelector('[data-screen="home"]').classList.contains("active")) {
+        showStory(currentStory + 1);
+      }
+    }, 5200);
+  </script>
+</body>
+</html>
